@@ -23,7 +23,7 @@ bl_info = {
     "description": "Utilities for 3D printing with basic Mesh Clean Up "
                    "based on '3D Print Toolbox' by Campbell Barton",
     "author": "Agnieszka Pas",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (2, 66, 0),
     "location": "3D View > Toolbox",
     "warning": "",
@@ -172,22 +172,15 @@ classes = (
     operators.Print3DCheckOverhang,
     operators.Print3DCheckAll,
 
-    # operators.Print3DCleanIsolated,
-    # operators.Print3DCleanDistorted,
-    # operators.Print3DCleanThin,
-    # operators.Print3DCleanNonManifold,
-
     operators.Print3DCleanDegenerates,
     operators.Print3DCleanLoose,
     operators.Print3DCleanDoubles,
     operators.Print3DCleanNonPlanars,
     operators.Print3DCleanConcave,
     operators.Print3DCleanTriangulateFaces,
+    operators.Print3DCleanHoles,
 
     operators.Print3DSelectReport,
-
-    # operators.Print3DScaleToVolume,
-    # operators.Print3DScaleToBounds,
 
     operators.Print3DExport,
 

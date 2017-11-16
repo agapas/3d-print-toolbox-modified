@@ -129,6 +129,8 @@ class Print3DToolBar:
         col = box.column()
         col.operator("mesh.print3d_clean_triangulates",
                      text="Triangulate Faces")
+        col = box.column()
+        col.operator("mesh.print3d_clean_holes", text="Fill Holes")
         box.separator()
         layout.separator()
 

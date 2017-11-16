@@ -630,6 +630,51 @@ class Print3DCleanTriangulateFaces(Operator):
         return {'FINISHED'}
 
 
+class Print3DCleanHoles(Operator):
+    """Fill in holes (boundary edge loops)"""
+    bl_idname = "mesh.print3d_clean_holes"
+    bl_label = "Fill Holes"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    sides = bpy.props.IntProperty(
+        name="Sides",
+        description="Number of sides in hole required to fill (zero fills all holes)",
+        default=4,
+        step=1
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.fill_holes(self.sides)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+             ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def fill_holes(sides):
+        """fill in holes (boundary edge loops)"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.fill_holes(sides=sides)
+
+
 # -------------
 # Select Report
 # ... helper function for info UI
@@ -678,118 +723,6 @@ class Print3DSelectReport(Operator):
         #~ bpy.ops.view3d.view_selected(use_all_regions=False)
 
         return {'FINISHED'}
-
-
-# -----------
-# Scale to...
-
-# def _scale(scale, report=None, report_suffix=""):
-#     if scale != 1.0:
-#         bpy.ops.transform.resize(value=(scale,) * 3,
-#                                  mirror=False, proportional='DISABLED',
-#                                  snap=False,
-#                                  texture_space=False)
-#     if report is not None:
-# report({'INFO'}, "Scaled by %s%s" % (clean_float("%.6f" % scale),
-# report_suffix))
-
-
-# class Print3DScaleToVolume(Operator):
-#     """Scale edit-mesh or selected-objects to a set volume"""
-#     bl_idname = "mesh.print3d_scale_to_volume"
-#     bl_label = "Scale to Volume"
-#     bl_options = {'REGISTER', 'UNDO'}
-
-#     volume_init = FloatProperty(
-#             options={'HIDDEN'},
-#             )
-#     volume = FloatProperty(
-#             name="Volume",
-#             unit='VOLUME',
-#             min=0.0, max=100000.0,
-#             )
-
-#     def execute(self, context):
-#         import math
-#         scale = math.pow(self.volume, 1 / 3) / math.pow(self.volume_init, 1 / 3)
-#         self.report({'INFO'}, "Scaled by %s" % clean_float("%.6f" % scale))
-#         _scale(scale, self.report)
-#         return {'FINISHED'}
-
-#     def invoke(self, context, event):
-
-#         def calc_volume(obj):
-#             bm = mesh_helpers.bmesh_copy_from_object(obj, apply_modifiers=True)
-#             volume = bm.calc_volume(signed=True)
-#             bm.free()
-#             return volume
-
-#         if context.mode == 'EDIT_MESH':
-#             volume = calc_volume(context.edit_object)
-#         else:
-#             volume = sum(calc_volume(obj) for obj in context.selected_editable_objects
-#                          if obj.type == 'MESH')
-
-#         if volume == 0.0:
-#             self.report({'WARNING'}, "Object has zero volume")
-#             return {'CANCELLED'}
-
-#         self.volume_init = self.volume = abs(volume)
-
-#         wm = context.window_manager
-#         return wm.invoke_props_dialog(self)
-
-
-# class Print3DScaleToBounds(Operator):
-#     """Scale edit-mesh or selected-objects to fit within a maximum length"""
-#     bl_idname = "mesh.print3d_scale_to_bounds"
-#     bl_label = "Scale to Bounds"
-#     bl_options = {'REGISTER', 'UNDO'}
-
-#     length_init = FloatProperty(
-#             options={'HIDDEN'},
-#             )
-#     axis_init = IntProperty(
-#             options={'HIDDEN'},
-#             )
-#     length = FloatProperty(
-#             name="Length Limit",
-#             unit='LENGTH',
-#             min=0.0, max=100000.0,
-#             )
-
-#     def execute(self, context):
-#         scale = self.length / self.length_init
-#         _scale(scale,
-#                report=self.report,
-#                report_suffix=", Clamping %s-Axis" % "XYZ"[self.axis_init])
-#         return {'FINISHED'}
-
-#     def invoke(self, context, event):
-#         from mathutils import Vector
-
-#         def calc_length(vecs):
-# return max(((max(v[i] for v in vecs) - min(v[i] for v in vecs)), i) for
-# i in range(3))
-
-#         if context.mode == 'EDIT_MESH':
-#             length, axis = calc_length([Vector(v) * obj.matrix_world
-#                                         for obj in [context.edit_object]
-#                                         for v in obj.bound_box])
-#         else:
-#             length, axis = calc_length([Vector(v) * obj.matrix_world
-#                                         for obj in context.selected_editable_objects
-# if obj.type == 'MESH' for v in obj.bound_box])
-
-#         if length == 0.0:
-#             self.report({'WARNING'}, "Object has zero bounds")
-#             return {'CANCELLED'}
-
-#         self.length_init = self.length = length
-#         self.axis_init = axis
-
-#         wm = context.window_manager
-#         return wm.invoke_props_dialog(self)
 
 
 # ------
