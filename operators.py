@@ -27,13 +27,10 @@ import bpy
 import bmesh
 from bpy.types import Operator
 from bpy.props import (
-    StringProperty,
     BoolProperty,
     IntProperty,
     FloatProperty,
-    FloatVectorProperty,
-    EnumProperty,
-    PointerProperty
+    EnumProperty
 )
 
 from . import (mesh_helpers, report)
@@ -371,7 +368,7 @@ class Print3DCleanDegenerates(Operator):
     bl_label = "Degenerate Dissolve"
     bl_options = {'REGISTER', 'UNDO'}
 
-    threshold = bpy.props.FloatProperty(
+    threshold = FloatProperty(
         name="Merge Distance",
         description="Minimum distance between elements to merge",
         default=0.0001,
@@ -416,7 +413,7 @@ class Print3DCleanDoubles(Operator):
     bl_label = "Remove Doubles"
     bl_options = {'REGISTER', 'UNDO'}
 
-    threshold = bpy.props.FloatProperty(
+    threshold = FloatProperty(
         name="Merge Distance",
         description="Minimum distance between elements to merge",
         default=0.0001,
@@ -461,19 +458,19 @@ class Print3DCleanLoose(Operator):
     bl_label = "Delete Loose"
     bl_options = {'REGISTER', 'UNDO'}
 
-    use_verts = bpy.props.BoolProperty(
+    use_verts = BoolProperty(
         name="Vertices",
         description="Remove loose vertices",
         default=True
     )
 
-    use_edges = bpy.props.BoolProperty(
+    use_edges = BoolProperty(
         name="Edges",
         description="Remove loose edges",
         default=True
     )
 
-    use_faces = bpy.props.BoolProperty(
+    use_faces = BoolProperty(
         name="Faces",
         description="Remove loose faces",
         default=True
@@ -518,7 +515,7 @@ class Print3DCleanNonPlanars(Operator):
     bl_label = "Split Non Planar Faces"
     bl_options = {'REGISTER', 'UNDO'}
 
-    angle_threshold = bpy.props.FloatProperty(
+    angle_threshold = FloatProperty(
         name="Max Angle",
         description="Angle limit",
         default=0.174533,
@@ -636,7 +633,7 @@ class Print3DCleanHoles(Operator):
     bl_label = "Fill Holes"
     bl_options = {'REGISTER', 'UNDO'}
 
-    sides = bpy.props.IntProperty(
+    sides = IntProperty(
         name="Sides",
         description="Number of sides in hole required to fill (zero fills all holes)",
         default=4,
@@ -673,6 +670,58 @@ class Print3DCleanHoles(Operator):
         """fill in holes (boundary edge loops)"""
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.fill_holes(sides=sides)
+
+
+class Print3DCleanLimited(Operator):
+    """Dissolve selected edges and verts, limited by the angle of surrounding geometry"""
+    bl_idname = "mesh.print3d_clean_limited"
+    bl_label = "Limited Dissolve"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    angle_threshold = FloatProperty(
+        name="Max Angle",
+        description="Angle limit",
+        default=0.0872665,
+        subtype="ANGLE",
+        unit="ROTATION",
+        step=10
+    )
+
+    use_boundaries = BoolProperty(
+        name="All Boundaries",
+        description="Dissolve all vertices inbetween face boundaries",
+        default=False
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.limited_dissolve(self.angle_threshold, self.use_boundaries)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+             ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def limited_dissolve(angle, use_boundaries):
+        """dissolve selected edges and verts, limited by the angle of surrounding geometry"""
+        bpy.ops.mesh.dissolve_limited(angle_limit=angle, use_dissolve_boundaries=use_boundaries, delimit={'NORMAL'})
 
 
 # -------------
