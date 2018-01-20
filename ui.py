@@ -63,8 +63,13 @@ class Print3DToolBar:
                     col.operator("mesh.print3d_select_report",
                         text=text,
                         icon=Print3DToolBar._type_to_icon[bm_type]).index = i
+                elif 'Volume:' in text:
+                    rowsub = col.row(align=True)
+                    rowsub.label(text)
+                    rowsub.operator("mesh.print3d_copy_to_clipboard", text="", icon='COPYDOWN').volume = text
                 else:
                     col.label(text)
+
             layout.separator()
 
     def draw(self, context):

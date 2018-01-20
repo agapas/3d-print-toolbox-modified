@@ -23,7 +23,7 @@ bl_info = {
     "description": "Utilities for 3D printing with basic Mesh Clean Up "
                    "based on '3D Print Toolbox' by Campbell Barton",
     "author": "Agnieszka Pas",
-    "version": (1, 2),
+    "version": (1, 3),
     "blender": (2, 66, 0),
     "location": "3D View > Toolbox",
     "warning": "",
@@ -182,6 +182,7 @@ classes = (
     operators.Print3DCleanLimited,
 
     operators.Print3DSelectReport,
+    operators.Print3DCopyToClipboard,
 
     operators.Print3DExport,
 

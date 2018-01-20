@@ -30,7 +30,8 @@ from bpy.props import (
     BoolProperty,
     IntProperty,
     FloatProperty,
-    EnumProperty
+    EnumProperty,
+    StringProperty
 )
 
 from . import (mesh_helpers, report)
@@ -46,6 +47,17 @@ def clean_float(text):
         text = head + tail
     return text
 
+def get_volume(text):
+    value_index = text.rfind(":")
+    if value_index != -1:
+        value_index += 2
+        text = text[value_index:]
+
+        index = text.rfind(".")
+        if index != -1:
+            index += 9
+            text = text[:index]
+    return text
 
 # get count of vertices, edges and faces in the mesh
 def elem_count(context):
@@ -770,6 +782,22 @@ class Print3DSelectReport(Operator):
 
         # cool, but in fact annoying
         #~ bpy.ops.view3d.view_selected(use_all_regions=False)
+
+        return {'FINISHED'}
+
+
+class Print3DCopyToClipboard(Operator):
+    """Copy the volume value to clipboard"""
+    bl_idname = "mesh.print3d_copy_to_clipboard"
+    bl_label = ""
+    bl_options = {'REGISTER', 'UNDO'}
+
+    volume = StringProperty()
+
+    def execute(self, context):
+        volume = self.volume
+        if volume:
+            context.window_manager.clipboard = get_volume(volume)
 
         return {'FINISHED'}
 
