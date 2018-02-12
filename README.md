@@ -5,6 +5,12 @@ Blender addon for clean up meshes, based on '3D Print Toolbox' by Campbell Barto
 
 <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" width="180" height="600"/>
 
+### Plans to do/add:
+
+* dropdown with options: 'Selected only' and 'All' for Degenarate Dissolve (Clean up area)
+* material cost calculations
+* export selected objects to multiple STL
+
 ### Installing
 
 * go to: File/User Preferences/Add-ons and click 'Install Add-on from File...'
