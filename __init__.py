@@ -20,15 +20,13 @@
 
 bl_info = {
     "name": "3D Print Toolbox Modified",
-    "description": "Utilities for 3D printing with basic Mesh Clean Up "
-                   "based on '3D Print Toolbox' by Campbell Barton",
+    "description": "Utilities for 3D printing",
     "author": "Agnieszka Pas",
-    "version": (1, 3),
-    "blender": (2, 66, 0),
+    "version": (1, 4),
+    "blender": (2, 78, 0),
     "location": "3D View > Toolbox",
     "warning": "",
-    "wiki_url": "",
-    "support": 'COMMUNITY',
+    'wiki_url': 'https://github.com/agapas/3d-print-toolbox-modified#readme',
     "category": "Mesh"
 }
 
@@ -185,6 +183,8 @@ classes = (
     operators.Print3DCopyToClipboard,
 
     operators.Print3DExport,
+
+    operators.MakeSolidFromSelected,
 
     Print3DSettings,
     printpreferences,

@@ -70,7 +70,7 @@ class Print3DToolBar:
                 else:
                     col.label(text)
 
-            layout.separator()
+            # layout.separator()
 
     def draw(self, context):
         layout = self.layout
@@ -78,6 +78,10 @@ class Print3DToolBar:
         scene = context.scene
         print_3d = scene.print_3d
         obj = context.object
+
+        col = layout.column()
+        col.operator("object.make_solid", "Make Solid")
+        # layout.separator()
 
         row = layout.row()
         row.label("Statistics:")
@@ -106,14 +110,14 @@ class Print3DToolBar:
         rowsub.operator("mesh.print3d_check_overhang", text="Overhang")
         rowsub.prop(print_3d, "angle_overhang", text="")
 
-        layout.separator()
+        # layout.separator()
         col = layout.column()
         col.operator("mesh.print3d_check_all",
             text="CHECK ALL",
             icon=Print3DToolBar._check_all_icon)
 
         # Added mesh clean up operators:
-        layout.separator()
+        # layout.separator()
         row = layout.row()
         row.label("Clean up:")
 
@@ -138,8 +142,8 @@ class Print3DToolBar:
         col.operator("mesh.print3d_clean_holes", text="Fill Holes")
         col = box.column()
         col.operator("mesh.print3d_clean_limited", text="Limited Dissolve")
-        box.separator()
-        layout.separator()
+        # box.separator()
+        # layout.separator()
 
         Print3DToolBar.draw_report(layout, context)
 
@@ -154,7 +158,7 @@ class Print3DToolBar:
         rowsub = col.row(align=True)
         rowsub.prop(print_3d, "export_format", text="")
         rowsub.operator("mesh.print3d_export", text="Export", icon='EXPORT')
-        layout.separator()
+        # layout.separator()
 
 
 # Showing panel in object mode

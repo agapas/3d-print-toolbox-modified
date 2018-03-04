@@ -34,7 +34,7 @@ from bpy.props import (
     StringProperty
 )
 
-from . import (mesh_helpers, report)
+from . import (mesh_helpers, report, make_solid_helpers)
 
 
 def clean_float(text):
@@ -734,6 +734,32 @@ class Print3DCleanLimited(Operator):
     def limited_dissolve(angle, use_boundaries):
         """dissolve selected edges and verts, limited by the angle of surrounding geometry"""
         bpy.ops.mesh.dissolve_limited(angle_limit=angle, use_dissolve_boundaries=use_boundaries, delimit={'NORMAL'})
+
+
+# ------------------------------------
+# Make Solid from selected objects
+
+class MakeSolidFromSelected(Operator):
+	"""Combine selected objects into one"""
+	bl_idname = "object.make_solid"
+	bl_label = "Make Solid"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	mode = 'UNION'
+
+	def execute(self, context):
+		active = context.active_object
+		selected = context.selected_objects
+
+		if active is None or len(selected) < 2:
+			self.report({'WARNING'}, "Select at least 2 objects")
+			return {'CANCELLED'}
+		else:
+			make_solid_helpers.prepare_meshes()
+			make_solid_helpers.make_solid_batch()
+			make_solid_helpers.is_manifold(self)
+
+		return {'FINISHED'}
 
 
 # -------------
