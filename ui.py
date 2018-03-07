@@ -53,22 +53,21 @@ class Print3DToolBar:
         if info:
             obj = context.edit_object
 
-            layout.label("Output:")
             box = layout.box()
             col = box.column(align=False)
-            # box.alert = True
             for i, (text, data) in enumerate(info):
                 if obj and data and data[1]:
                     bm_type, bm_array = data
                     col.operator("mesh.print3d_select_report",
                         text=text,
                         icon=Print3DToolBar._type_to_icon[bm_type]).index = i
-                elif 'Volume:' in text:
+                else:
                     rowsub = col.row(align=True)
                     rowsub.label(text)
-                    rowsub.operator("mesh.print3d_copy_to_clipboard", text="", icon='COPYDOWN').volume = text
-                else:
-                    col.label(text)
+                    if 'Volume:' in text:
+                        rowsub.operator("mesh.print3d_copy_volume_to_clipboard", text="", icon='COPYDOWN').volume = text
+                    else:
+                        rowsub.operator("mesh.print3d_copy_area_to_clipboard", text="", icon='COPYDOWN').area = text
 
 
     def draw(self, context):
@@ -78,14 +77,18 @@ class Print3DToolBar:
         print_3d = scene.print_3d
         obj = context.object
 
-        col = layout.column()
-        col.operator("object.make_solid", "Make Solid")
-
         row = layout.row()
         row.label("Statistics:")
         rowsub = layout.row(align=True)
         rowsub.operator("mesh.print3d_info_volume", text="Volume")
         rowsub.operator("mesh.print3d_info_area", text="Area")
+
+        Print3DToolBar.draw_report(layout, context)
+        layout.separator()
+
+        box = layout.box()
+        col = box.column()
+        col.operator("object.make_solid", "Make Solid")
 
         row = layout.row()
         row.label("Checks:")
@@ -137,8 +140,6 @@ class Print3DToolBar:
         col.operator("mesh.print3d_clean_holes", text="Fill Holes")
         col = box.column()
         col.operator("mesh.print3d_clean_limited", text="Limited Dissolve")
-
-        Print3DToolBar.draw_report(layout, context)
 
         col = layout.column()
         rowsub = col.row(align=True)

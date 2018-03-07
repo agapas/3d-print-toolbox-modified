@@ -1,5 +1,5 @@
 # 3d-print-toolbox-modified
-Blender addon with utilities for 3d printing. It's based on '3D Print Toolbox' by Campbell Barton. Compared to original '3D Print Toolbox' it's possible to have influence on the clean up settings.
+Blender addon with utilities for 3d printing. It's based on '3D Print Toolbox' by Campbell Barton. In this modified version it's possible to have more influence on the clean up settings and it gives more flexibility.
 
 Images below display original '3D Print Toolbox' (image on the left) and current modified version (image on the right):
 
@@ -11,15 +11,16 @@ Images below display original '3D Print Toolbox' (image on the left) and current
 ### Added Features
 
 * added [make-solid](https://github.com/agapas/make-solid)
-* more visible 'Check All' button (Checks area)
-* completely changed 'Clean Up' area to have more influence on the clean up process
-* added 'Copy to Clipboard' of the volume in Output area
-* moved Report's Output before Export Path area
+* more visible 'Check All' button (Checks part)
+* completely changed 'Clean Up' part to have more influence on the clean up process
+* added 'Copy to Clipboard' of the Volume and Area in Report's Output
+* moved Report's Output into Statistics
 
 ### Plans to add:
 
+* redesign addon's panel (add panel for each part separately instead of 1 common panel for all parts)
 * material cost calculations (work in progress)
-* dropdown with options: 'Selected only' and 'All' for Degenerate Dissolve (Clean up area)
+* dropdown with options: 'Selected only' and 'All' for Degenerate Dissolve (Clean up part)
 * export selected objects to multiple STL
 * add more description into Readme for added features
 

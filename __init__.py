@@ -22,7 +22,7 @@ bl_info = {
     "name": "3D Print Toolbox Modified",
     "description": "Utilities for 3D printing",
     "author": "Agnieszka Pas",
-    "version": (1, 4),
+    "version": (1, 5),
     "blender": (2, 78, 0),
     "location": "3D View > Toolbox",
     "warning": "",
@@ -160,6 +160,9 @@ classes = (
 
     operators.Print3DInfoVolume,
     operators.Print3DInfoArea,
+    operators.Print3DSelectReport,
+    operators.Print3DCopyVolumeToClipboard,
+    operators.Print3DCopyAreaToClipboard,
 
     operators.Print3DCheckDegenerate,
     operators.Print3DCheckDistorted,
@@ -178,9 +181,6 @@ classes = (
     operators.Print3DCleanTriangulateFaces,
     operators.Print3DCleanHoles,
     operators.Print3DCleanLimited,
-
-    operators.Print3DSelectReport,
-    operators.Print3DCopyToClipboard,
 
     operators.Print3DExport,
 

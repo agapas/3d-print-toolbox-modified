@@ -47,7 +47,7 @@ def clean_float(text):
         text = head + tail
     return text
 
-def get_volume(text):
+def get_text_value(text):
     value_index = text.rfind(":")
     if value_index != -1:
         value_index += 2
@@ -812,18 +812,38 @@ class Print3DSelectReport(Operator):
         return {'FINISHED'}
 
 
-class Print3DCopyToClipboard(Operator):
+class Print3DCopyVolumeToClipboard(Operator):
     """Copy the volume value to clipboard"""
-    bl_idname = "mesh.print3d_copy_to_clipboard"
+    bl_idname = "mesh.print3d_copy_volume_to_clipboard"
     bl_label = ""
     bl_options = {'REGISTER', 'UNDO'}
 
-    volume = StringProperty()
+    volume = StringProperty(name="Copied to Clipboard (Volume):")
 
     def execute(self, context):
         volume = self.volume
         if volume:
-            context.window_manager.clipboard = get_volume(volume)
+            text_value = get_text_value(volume)
+            context.window_manager.clipboard = text_value
+            self.volume = text_value
+
+        return {'FINISHED'}
+
+
+class Print3DCopyAreaToClipboard(Operator):
+    """Copy the area value to clipboard"""
+    bl_idname = "mesh.print3d_copy_area_to_clipboard"
+    bl_label = ""
+    bl_options = {'REGISTER', 'UNDO'}
+
+    area = StringProperty(name="Copied to Clipboard (Area):")
+
+    def execute(self, context):
+        area = self.area
+        if area:
+            text_value = get_text_value(area)
+            context.window_manager.clipboard = text_value
+            self.area = text_value
 
         return {'FINISHED'}
 
