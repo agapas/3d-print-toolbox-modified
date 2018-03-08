@@ -53,6 +53,8 @@ class Print3DToolBar:
         if info:
             obj = context.edit_object
 
+            layout.label("Output:")
+
             box = layout.box()
             col = box.column(align=False)
             for i, (text, data) in enumerate(info):
@@ -61,13 +63,16 @@ class Print3DToolBar:
                     col.operator("mesh.print3d_select_report",
                         text=text,
                         icon=Print3DToolBar._type_to_icon[bm_type]).index = i
-                else:
+                elif 'Volume:' in text:
                     rowsub = col.row(align=True)
                     rowsub.label(text)
-                    if 'Volume:' in text:
-                        rowsub.operator("mesh.print3d_copy_volume_to_clipboard", text="", icon='COPYDOWN').volume = text
-                    else:
-                        rowsub.operator("mesh.print3d_copy_area_to_clipboard", text="", icon='COPYDOWN').area = text
+                    rowsub.operator("mesh.print3d_copy_volume_to_clipboard", text="", icon='COPYDOWN').volume = text
+                elif 'Area:' in text:
+                    rowsub = col.row(align=True)
+                    rowsub.label(text)
+                    rowsub.operator("mesh.print3d_copy_area_to_clipboard", text="", icon='COPYDOWN').area = text
+                else:
+                    col.label(text)
 
 
     def draw(self, context):
@@ -78,12 +83,10 @@ class Print3DToolBar:
         obj = context.object
 
         row = layout.row()
-        row.label("Statistics:")
+        layout.label("Statistics:")
         rowsub = layout.row(align=True)
         rowsub.operator("mesh.print3d_info_volume", text="Volume")
         rowsub.operator("mesh.print3d_info_area", text="Area")
-
-        Print3DToolBar.draw_report(layout, context)
         layout.separator()
 
         box = layout.box()
@@ -122,24 +125,24 @@ class Print3DToolBar:
 
         box = layout.box()
         col = box.column()
-        col.operator("mesh.print3d_clean_degenerates",
-                     text="Degenerate Dissolve")
+        col.operator("mesh.print3d_clean_degenerates", text="Degenerate Dissolve")
         col = box.column()
         col.operator("mesh.print3d_clean_doubles", text="Remove Doubles")
         col = box.column()
         col.operator("mesh.print3d_clean_loose", text="Delete Loose")
         col = box.column()
-        col.operator("mesh.print3d_clean_non_planars",
-                     text="Split Non Planar Faces")
+        col.operator("mesh.print3d_clean_non_planars", text="Split Non Planar Faces")
         col = box.column()
         col.operator("mesh.print3d_clean_concaves", text="Split Concave Faces")
         col = box.column()
-        col.operator("mesh.print3d_clean_triangulates",
-                     text="Triangulate Faces")
+        col.operator("mesh.print3d_clean_triangulates", text="Triangulate Faces")
         col = box.column()
         col.operator("mesh.print3d_clean_holes", text="Fill Holes")
         col = box.column()
         col.operator("mesh.print3d_clean_limited", text="Limited Dissolve")
+
+        Print3DToolBar.draw_report(layout, context)
+        layout.separator()
 
         col = layout.column()
         rowsub = col.row(align=True)

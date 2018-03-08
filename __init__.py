@@ -22,7 +22,7 @@ bl_info = {
     "name": "3D Print Toolbox Modified",
     "description": "Utilities for 3D printing",
     "author": "Agnieszka Pas",
-    "version": (1, 5),
+    "version": (1, 5, 1),
     "blender": (2, 78, 0),
     "location": "3D View > Toolbox",
     "warning": "",
