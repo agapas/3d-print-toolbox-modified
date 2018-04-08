@@ -11,18 +11,13 @@ Images below display original '3D Print Toolbox' (image on the left) and current
 ### Added Features
 
 * added [make-solid](https://github.com/agapas/make-solid)
-* more visible 'Check All' button (Checks part)
+* made 'Check All' button more visible
 * completely changed 'Clean Up' part to have more influence on the clean up process
 * added 'Copy to Clipboard' of the Volume and Area in Report's Output
 
 ### Plans to add:
 
-* remove displaying Volume and Area from Report's Output and move it into Statistics part
-* redesign addon's panel (add panel for each part separately instead of 1 common panel for all parts)
-* material cost calculations (work in progress)
-* dropdown with options: 'Selected only' and 'All' for Degenerate Dissolve (Clean up part)
 * export selected objects to multiple STL
-* add more description into Readme for added features
 
 ### Installing
 
