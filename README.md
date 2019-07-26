@@ -1,11 +1,15 @@
 # 3d-print-toolbox-modified
 Blender addon with utilities for 3d printing. It's based on '3D Print Toolbox' by Campbell Barton. In this modified version it's possible to have more influence on the clean up settings and it gives more flexibility.
 
+### Blender version:
+Tested on Blender 2.80 Release Candidate 3 (windows64).
+If you need version for Blender 2.79 or older, check the link: [Version for Blender 2.79](https://github.com/agapas/3d-print-toolbox-modified-blender2.79)
+
 Images below display original '3D Print Toolbox' (image on the left) and current modified version (image on the right):
 
 <p align="middle">
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="180" height="600" />
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="180" height="600" />
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="200" height="600" />
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="200" height="600" />
 </p>
 
 ### Added Features

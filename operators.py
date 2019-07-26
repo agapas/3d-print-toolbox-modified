@@ -24,7 +24,6 @@
 #----------------------------------------------------------
 
 import bpy
-import bmesh
 from bpy.types import Operator
 from bpy.props import (
     BoolProperty,
@@ -33,8 +32,13 @@ from bpy.props import (
     EnumProperty,
     StringProperty
 )
+import bmesh
 
-from . import (mesh_helpers, report, make_solid_helpers)
+from . import (
+    mesh_helpers,
+    report,
+    make_solid_helpers
+)
 
 
 def clean_float(text):
@@ -47,6 +51,7 @@ def clean_float(text):
         text = head + tail
     return text
 
+
 def get_text_value(text):
     value_index = text.rfind(":")
     if value_index != -1:
@@ -58,6 +63,7 @@ def get_text_value(text):
             index += 9
             text = text[:index]
     return text
+
 
 # get count of vertices, edges and faces in the mesh
 def elem_count(context):
@@ -75,7 +81,7 @@ def setup_environment():
 # ---------
 # Mesh Info
 
-class Print3DInfoVolume(Operator):
+class MESH_OT_Print3D_Info_Volume(Operator):
     """Report the volume of the active mesh"""
     bl_idname = "mesh.print3d_info_volume"
     bl_label = "Print3D Info Volume"
@@ -92,11 +98,9 @@ class Print3DInfoVolume(Operator):
 
         info = []
         if unit.system == 'METRIC':
-            info.append(("Volume: %s cm³" % clean_float("%.4f" %
-                                                        ((volume * (scale ** 3.0)) / (0.01 ** 3.0))), None))
+            info.append(("Volume: %s cm³" % clean_float("%.4f" % ((volume * (scale ** 3.0)) / (0.01 ** 3.0))), None))
         elif unit.system == 'IMPERIAL':
-            info.append(("Volume: %s \"³" % clean_float("%.4f" %
-                                                        ((volume * (scale ** 3.0)) / (0.0254 ** 3.0))), None))
+            info.append(("Volume: %s \"³" % clean_float("%.4f" % ((volume * (scale ** 3.0)) / (0.0254 ** 3.0))), None))
         else:
             info.append(("Volume: %s³" % clean_float("%.8f" % volume), None))
 
@@ -104,7 +108,7 @@ class Print3DInfoVolume(Operator):
         return {'FINISHED'}
 
 
-class Print3DInfoArea(Operator):
+class MESH_OT_Print3D_Info_Area(Operator):
     """Report the surface area of the active mesh"""
     bl_idname = "mesh.print3d_info_area"
     bl_label = "Print3D Info Area"
@@ -121,11 +125,9 @@ class Print3DInfoArea(Operator):
 
         info = []
         if unit.system == 'METRIC':
-            info.append(("Area: %s cm²" % clean_float("%.4f" %
-                                                      ((area * (scale ** 2.0)) / (0.01 ** 2.0))), None))
+            info.append(("Area: %s cm²" % clean_float("%.4f" % ((area * (scale ** 2.0)) / (0.01 ** 2.0))), None))
         elif unit.system == 'IMPERIAL':
-            info.append(("Area: %s \"²" % clean_float("%.4f" %
-                                                      ((area * (scale ** 2.0)) / (0.0254 ** 2.0))), None))
+            info.append(("Area: %s \"²" % clean_float("%.4f" % ((area * (scale ** 2.0)) / (0.0254 ** 2.0))), None))
         else:
             info.append(("Area: %s²" % clean_float("%.8f" % area), None))
 
@@ -146,7 +148,7 @@ def execute_check(self, context):
     return {'FINISHED'}
 
 
-class Print3DCheckSolid(Operator):
+class MESH_OT_Print3D_Check_Solid(Operator):
     """Check for geometry is solid (has valid inside/outside) and correct normals"""
     bl_idname = "mesh.print3d_check_solid"
     bl_label = "Print3D Check Solid"
@@ -155,19 +157,18 @@ class Print3DCheckSolid(Operator):
     def main_check(obj, info):
         import array
 
-        bm = mesh_helpers.bmesh_copy_from_object(
-            obj, transform=False, triangulate=False)
+        bm = mesh_helpers.bmesh_copy_from_object(obj, transform=False, triangulate=False)
 
         edges_non_manifold = array.array('i', (i for i, ele in enumerate(bm.edges)
-                                               if not ele.is_manifold))
+                if not ele.is_manifold))
         edges_non_contig = array.array('i', (i for i, ele in enumerate(bm.edges)
-                                             if ele.is_manifold and (not ele.is_contiguous)))
+                if ele.is_manifold and (not ele.is_contiguous)))
 
         info.append(("Non Manifold Edge: %d" % len(edges_non_manifold),
                      (bmesh.types.BMEdge, edges_non_manifold)))
 
         info.append(("Bad Contig. Edges: %d" % len(edges_non_contig),
-                     (bmesh.types.BMEdge, edges_non_contig)))
+                    (bmesh.types.BMEdge, edges_non_contig)))
 
         bm.free()
 
@@ -175,7 +176,7 @@ class Print3DCheckSolid(Operator):
         return execute_check(self, context)
 
 
-class Print3DCheckIntersections(Operator):
+class MESH_OT_Print3D_Check_Intersections(Operator):
     """Check geometry for self intersections"""
     bl_idname = "mesh.print3d_check_intersect"
     bl_label = "Print3D Check Intersections"
@@ -190,32 +191,30 @@ class Print3DCheckIntersections(Operator):
         return execute_check(self, context)
 
 
-class Print3DCheckDegenerate(Operator):
+class MESH_OT_Print3D_Check_Degenerate(Operator):
     """Check for degenerate geometry that may not print properly """ \
-        """(zero area faces, zero length edges)"""
+    """(zero area faces, zero length edges)"""
     bl_idname = "mesh.print3d_check_degenerate"
     bl_label = "Print3D Check Degenerate"
 
     @staticmethod
     def main_check(obj, info):
         import array
+
         scene = bpy.context.scene
         print_3d = scene.print_3d
         threshold = print_3d.threshold_zero
 
-        bm = mesh_helpers.bmesh_copy_from_object(
-            obj, transform=False, triangulate=False)
+        bm = mesh_helpers.bmesh_copy_from_object(obj, transform=False, triangulate=False)
 
-        faces_zero = array.array('i', (i for i, ele in enumerate(
-            bm.faces) if ele.calc_area() <= threshold))
-        edges_zero = array.array('i', (i for i, ele in enumerate(
-            bm.edges) if ele.calc_length() <= threshold))
+        faces_zero = array.array('i', (i for i, ele in enumerate(bm.faces) if ele.calc_area() <= threshold))
+        edges_zero = array.array('i', (i for i, ele in enumerate(bm.edges) if ele.calc_length() <= threshold))
 
         info.append(("Zero Faces: %d" % len(faces_zero),
-                     (bmesh.types.BMFace, faces_zero)))
+                    (bmesh.types.BMFace, faces_zero)))
 
         info.append(("Zero Edges: %d" % len(edges_zero),
-                     (bmesh.types.BMEdge, edges_zero)))
+                    (bmesh.types.BMEdge, edges_zero)))
 
         bm.free()
 
@@ -223,7 +222,7 @@ class Print3DCheckDegenerate(Operator):
         return execute_check(self, context)
 
 
-class Print3DCheckDistorted(Operator):
+class MESH_OT_Print3D_Check_Distorted(Operator):
     """Check for non-flat faces """
     bl_idname = "mesh.print3d_check_distort"
     bl_label = "Print3D Check Distorted Faces"
@@ -236,23 +235,16 @@ class Print3DCheckDistorted(Operator):
         print_3d = scene.print_3d
         angle_distort = print_3d.angle_distort
 
-        def face_is_distorted(ele):
-            no = ele.normal
-            angle_fn = no.angle
-            for loop in ele.loops:
-                if angle_fn(loop.calc_normal(), 1000.0) > angle_distort:
-                    return True
-            return False
-
-        bm = mesh_helpers.bmesh_copy_from_object(
-            obj, transform=True, triangulate=False)
+        bm = mesh_helpers.bmesh_copy_from_object(obj, transform=True, triangulate=False)
         bm.normal_update()
 
         faces_distort = array.array(
-            'i', (i for i, ele in enumerate(bm.faces) if face_is_distorted(ele)))
+            'i',
+            (i for i, ele in enumerate(bm.faces) if mesh_helpers.face_is_distorted(ele, angle_distort))
+        )
 
         info.append(("Non-Flat Faces: %d" % len(faces_distort),
-                     (bmesh.types.BMFace, faces_distort)))
+                    (bmesh.types.BMFace, faces_distort)))
 
         bm.free()
 
@@ -260,9 +252,9 @@ class Print3DCheckDistorted(Operator):
         return execute_check(self, context)
 
 
-class Print3DCheckThick(Operator):
+class MESH_OT_Print3D_Check_Thick(Operator):
     """Check geometry is above the minimum thickness preference """ \
-        """(relies on correct normals)"""
+    """(relies on correct normals)"""
     bl_idname = "mesh.print3d_check_thick"
     bl_label = "Print3D Check Thickness"
 
@@ -271,17 +263,16 @@ class Print3DCheckThick(Operator):
         scene = bpy.context.scene
         print_3d = scene.print_3d
 
-        faces_error = mesh_helpers.bmesh_check_thick_object(
-            obj, print_3d.thickness_min)
+        faces_error = mesh_helpers.bmesh_check_thick_object(obj, print_3d.thickness_min)
 
         info.append(("Thin Faces: %d" % len(faces_error),
-                     (bmesh.types.BMFace, faces_error)))
+                    (bmesh.types.BMFace, faces_error)))
 
     def execute(self, context):
         return execute_check(self, context)
 
 
-class Print3DCheckSharp(Operator):
+class MESH_OT_Print3D_Check_Sharp(Operator):
     """Check edges are below the sharpness preference"""
     bl_idname = "mesh.print3d_check_sharp"
     bl_label = "Print3D Check Sharp"
@@ -292,22 +283,21 @@ class Print3DCheckSharp(Operator):
         print_3d = scene.print_3d
         angle_sharp = print_3d.angle_sharp
 
-        bm = mesh_helpers.bmesh_copy_from_object(
-            obj, transform=True, triangulate=False)
+        bm = mesh_helpers.bmesh_copy_from_object(obj, transform=True, triangulate=False)
         bm.normal_update()
 
         edges_sharp = [ele.index for ele in bm.edges
                        if ele.is_manifold and ele.calc_face_angle_signed() > angle_sharp]
 
         info.append(("Sharp Edge: %d" % len(edges_sharp),
-                     (bmesh.types.BMEdge, edges_sharp)))
+                    (bmesh.types.BMEdge, edges_sharp)))
         bm.free()
 
     def execute(self, context):
         return execute_check(self, context)
 
 
-class Print3DCheckOverhang(Operator):
+class MESH_OT_Print3D_Check_Overhang(Operator):
     """Check faces don't overhang past a certain angle"""
     bl_idname = "mesh.print3d_check_overhang"
     bl_label = "Print3D Check Overhang"
@@ -325,8 +315,7 @@ class Print3DCheckOverhang(Operator):
             info.append(("Skipping Overhang", ()))
             return
 
-        bm = mesh_helpers.bmesh_copy_from_object(
-            obj, transform=True, triangulate=False)
+        bm = mesh_helpers.bmesh_copy_from_object(obj, transform=True, triangulate=False)
         bm.normal_update()
 
         z_down = Vector((0, 0, -1.0))
@@ -344,19 +333,19 @@ class Print3DCheckOverhang(Operator):
         return execute_check(self, context)
 
 
-class Print3DCheckAll(Operator):
+class MESH_OT_Print3D_Check_All(Operator):
     """Run all checks"""
     bl_idname = "mesh.print3d_check_all"
     bl_label = "Print3D Check All"
 
     check_cls = (
-        Print3DCheckSolid,
-        Print3DCheckIntersections,
-        Print3DCheckDegenerate,
-        Print3DCheckDistorted,
-        Print3DCheckThick,
-        Print3DCheckSharp,
-        Print3DCheckOverhang,
+        MESH_OT_Print3D_Check_Solid,
+        MESH_OT_Print3D_Check_Intersections,
+        MESH_OT_Print3D_Check_Degenerate,
+        MESH_OT_Print3D_Check_Distorted,
+        MESH_OT_Print3D_Check_Thick,
+        MESH_OT_Print3D_Check_Sharp,
+        MESH_OT_Print3D_Check_Overhang,
     )
 
     def execute(self, context):
@@ -374,13 +363,13 @@ class Print3DCheckAll(Operator):
 # ---------------
 # Mesh Clean Up
 
-class Print3DCleanDegenerates(Operator):
+class MESH_OT_Print3D_Clean_Degenerates(Operator):
     """Dissolve zero area faces and zero length egdes"""
     bl_idname = "mesh.print3d_clean_degenerates"
     bl_label = "Degenerate Dissolve"
     bl_options = {'REGISTER', 'UNDO'}
 
-    threshold = FloatProperty(
+    threshold: FloatProperty(
         name="Merge Distance",
         description="Minimum distance between elements to merge",
         default=0.0001,
@@ -408,7 +397,7 @@ class Print3DCleanDegenerates(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -419,13 +408,13 @@ class Print3DCleanDegenerates(Operator):
         bpy.ops.mesh.dissolve_degenerate(threshold=threshold)
 
 
-class Print3DCleanDoubles(Operator):
+class MESH_OT_Print3D_Clean_Doubles(Operator):
     """Remove duplicate vertices"""
     bl_idname = "mesh.print3d_clean_doubles"
     bl_label = "Remove Doubles"
     bl_options = {'REGISTER', 'UNDO'}
 
-    threshold = FloatProperty(
+    threshold: FloatProperty(
         name="Merge Distance",
         description="Minimum distance between elements to merge",
         default=0.0001,
@@ -453,7 +442,7 @@ class Print3DCleanDoubles(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -464,25 +453,25 @@ class Print3DCleanDoubles(Operator):
         bpy.ops.mesh.remove_doubles(threshold=threshold)
 
 
-class Print3DCleanLoose(Operator):
+class MESH_OT_Print3D_Clean_Loose(Operator):
     """Delete loose vertices, edges or faces"""
     bl_idname = "mesh.print3d_clean_loose"
     bl_label = "Delete Loose"
     bl_options = {'REGISTER', 'UNDO'}
 
-    use_verts = BoolProperty(
+    use_verts: BoolProperty(
         name="Vertices",
         description="Remove loose vertices",
         default=True
     )
 
-    use_edges = BoolProperty(
+    use_edges: BoolProperty(
         name="Edges",
         description="Remove loose edges",
         default=True
     )
 
-    use_faces = BoolProperty(
+    use_faces: BoolProperty(
         name="Faces",
         description="Remove loose faces",
         default=True
@@ -509,7 +498,7 @@ class Print3DCleanLoose(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -517,17 +506,16 @@ class Print3DCleanLoose(Operator):
     def delete_loose(use_verts, use_edges, use_faces):
         """delete loose vertices, edges or faces"""
         bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.delete_loose(
-            use_verts=use_verts, use_edges=use_edges, use_faces=use_faces)
+        bpy.ops.mesh.delete_loose(use_verts=use_verts, use_edges=use_edges, use_faces=use_faces)
 
 
-class Print3DCleanNonPlanars(Operator):
+class MESH_OT_Print3D_Clean_Non_Planars(Operator):
     """Split non-planar faces that exceed the angle threshold"""
     bl_idname = "mesh.print3d_clean_non_planars"
     bl_label = "Split Non Planar Faces"
     bl_options = {'REGISTER', 'UNDO'}
 
-    angle_threshold = FloatProperty(
+    angle_threshold: FloatProperty(
         name="Max Angle",
         description="Angle limit",
         default=0.174533,
@@ -557,7 +545,7 @@ class Print3DCleanNonPlanars(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -569,7 +557,7 @@ class Print3DCleanNonPlanars(Operator):
         # bpy.ops.ui.reports_to_textblock()
 
 
-class Print3DCleanConcave(Operator):
+class MESH_OT_Print3D_Clean_Concave(Operator):
     """Make all faces convex"""
     bl_idname = "mesh.print3d_clean_concaves"
     bl_label = "Split Concave Faces"
@@ -596,7 +584,7 @@ class Print3DCleanConcave(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -607,7 +595,7 @@ class Print3DCleanConcave(Operator):
         bpy.ops.mesh.vert_connect_concave()
 
 
-class Print3DCleanTriangulateFaces(Operator):
+class MESH_OT_Print3D_Clean_Triangulate_Faces(Operator):
     """Triangulate selected faces"""
     bl_idname = "mesh.print3d_clean_triangulates"
     bl_label = "Triangulate Faces"
@@ -634,18 +622,18 @@ class Print3DCleanTriangulateFaces(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
 
-class Print3DCleanHoles(Operator):
+class MESH_OT_Print3D_Clean_Holes(Operator):
     """Fill in holes (boundary edge loops)"""
     bl_idname = "mesh.print3d_clean_holes"
     bl_label = "Fill Holes"
     bl_options = {'REGISTER', 'UNDO'}
 
-    sides = IntProperty(
+    sides: IntProperty(
         name="Sides",
         description="Number of sides in hole required to fill (zero fills all holes)",
         default=4,
@@ -673,7 +661,7 @@ class Print3DCleanHoles(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -684,13 +672,13 @@ class Print3DCleanHoles(Operator):
         bpy.ops.mesh.fill_holes(sides=sides)
 
 
-class Print3DCleanLimited(Operator):
+class MESH_OT_Print3D_Clean_Limited(Operator):
     """Dissolve selected edges and verts, limited by the angle of surrounding geometry"""
     bl_idname = "mesh.print3d_clean_limited"
     bl_label = "Limited Dissolve"
     bl_options = {'REGISTER', 'UNDO'}
 
-    angle_threshold = FloatProperty(
+    angle_threshold: FloatProperty(
         name="Max Angle",
         description="Angle limit",
         default=0.0872665,
@@ -699,7 +687,7 @@ class Print3DCleanLimited(Operator):
         step=10
     )
 
-    use_boundaries = BoolProperty(
+    use_boundaries: BoolProperty(
         name="All Boundaries",
         description="Dissolve all vertices inbetween face boundaries",
         default=False
@@ -726,7 +714,7 @@ class Print3DCleanLimited(Operator):
             (bm_key[0] - bm_key_orig[0],
              bm_key[1] - bm_key_orig[1],
              bm_key[2] - bm_key_orig[2]
-             ))
+            ))
 
         return {'FINISHED'}
 
@@ -739,13 +727,13 @@ class Print3DCleanLimited(Operator):
 # ------------------------------------
 # Make Solid from selected objects
 
-class MakeSolidFromSelected(Operator):
+class MESH_OT_Print3D_Make_Solid_From_Selected(Operator):
 	"""Combine selected objects into one"""
 	bl_idname = "object.make_solid"
 	bl_label = "Make Solid"
 	bl_options = {'REGISTER', 'UNDO'}
 
-	mode = 'UNION'
+	mode: 'UNION'
 
 	def execute(self, context):
 		active = context.active_object
@@ -766,13 +754,13 @@ class MakeSolidFromSelected(Operator):
 # Select Report
 # ... helper function for info UI
 
-class Print3DSelectReport(Operator):
+class MESH_OT_Print3D_Select_Report(Operator):
     """Select the data associated with this report"""
     bl_idname = "mesh.print3d_select_report"
     bl_label = "Print3D Select Report"
     bl_options = {'INTERNAL'}
 
-    index = IntProperty()
+    index: IntProperty()
 
     _type_to_mode = {
         bmesh.types.BMVert: 'VERT',
@@ -797,7 +785,7 @@ class Print3DSelectReport(Operator):
         bpy.ops.mesh.select_mode(type=self._type_to_mode[bm_type])
 
         bm = bmesh.from_edit_mesh(obj.data)
-        elems = getattr(bm, Print3DSelectReport._type_to_attr[bm_type])[:]
+        elems = getattr(bm, MESH_OT_Print3D_Select_Report._type_to_attr[bm_type])[:]
 
         try:
             for i in bm_array:
@@ -812,13 +800,13 @@ class Print3DSelectReport(Operator):
         return {'FINISHED'}
 
 
-class Print3DCopyVolumeToClipboard(Operator):
+class MESH_OT_Print3D_Copy_Volume_To_Clipboard(Operator):
     """Copy the volume value to clipboard"""
     bl_idname = "mesh.print3d_copy_volume_to_clipboard"
     bl_label = ""
     bl_options = {'REGISTER', 'UNDO'}
 
-    volume = StringProperty(name="Copied to Clipboard (Volume):")
+    volume: StringProperty(name="Copied to Clipboard (Volume):")
 
     def execute(self, context):
         volume = self.volume
@@ -830,13 +818,13 @@ class Print3DCopyVolumeToClipboard(Operator):
         return {'FINISHED'}
 
 
-class Print3DCopyAreaToClipboard(Operator):
+class MESH_OT_Print3D_Copy_Area_To_Clipboard(Operator):
     """Copy the area value to clipboard"""
     bl_idname = "mesh.print3d_copy_area_to_clipboard"
     bl_label = ""
     bl_options = {'REGISTER', 'UNDO'}
 
-    area = StringProperty(name="Copied to Clipboard (Area):")
+    area: StringProperty(name="Copied to Clipboard (Area):")
 
     def execute(self, context):
         area = self.area
@@ -851,14 +839,12 @@ class Print3DCopyAreaToClipboard(Operator):
 # ------
 # Export
 
-class Print3DExport(Operator):
+class MESH_OT_Print3D_Export(Operator):
     """Export active object using print3d settings"""
     bl_idname = "mesh.print3d_export"
     bl_label = "Print3D Export"
 
     def execute(self, context):
-        scene = bpy.context.scene
-        print_3d = scene.print_3d
         from . import export
 
         info = []

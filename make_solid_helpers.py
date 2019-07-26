@@ -77,14 +77,14 @@ def prepare_mesh(obj, select_action):
 def cleanup_mesh(obj):
 	mesh = obj.data
 	bm = bmesh.new()
-	bm.from_mesh(mesh)
-	bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0001)
-	bm.to_mesh(mesh)
+	bm.from_mesh(mesh=mesh)
+	bmesh.ops.remove_doubles(bm=bm, verts=bm.verts, dist=0.0001)
+	bm.to_mesh(mesh=mesh)
 	bm.free()
 
 
 def add_modifier(active, selected):
-	bool_modifier = active.modifiers.new('Boolean', 'BOOLEAN')
+	bool_modifier = active.modifiers.new(name='Boolean', type='BOOLEAN')
 	bool_modifier.object = selected
 	bool_modifier.show_viewport = False
 	bool_modifier.show_render = False
@@ -96,7 +96,11 @@ def add_modifier(active, selected):
 
 	bpy.ops.object.modifier_apply(modifier='Boolean')
 
-	bpy.context.scene.objects.unlink(selected)
+	# bpy.context.scene.objects.unlink(selected)
+	layer = context.view_layer
+	layer_collection = context.layer_collection or layer.active_layer_collection
+	scene_collection = layer_collection.collection
+	scene_collection.objects.unlink(selected)
 	bpy.data.objects.remove(selected)
 
 
@@ -116,12 +120,12 @@ def make_solid_batch():
 def is_manifold(self):
 	mesh = bpy.context.active_object.data
 	bm = bmesh.new()
-	bm.from_mesh(mesh)
+	bm.from_mesh(mesh=mesh)
 
 	for edge in bm.edges:
 		if not edge.is_manifold:
 			bm.free()
-			self.report({'ERROR'}, 'Boolean operation result is non-manifold')
+			self.report({'ERROR'}, "Boolean operation result is non-manifold")
 			return False
 
 	bm.free()

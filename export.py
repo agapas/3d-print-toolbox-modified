@@ -23,14 +23,15 @@
 # Export wrappers and integration with external tools.
 #----------------------------------------------------------
 
-import bpy
 import os
+import bpy
 
 
 def image_copy_guess(filepath, objects):
     # 'filepath' is the path we are writing to.
     import shutil
     from bpy_extras import object_utils
+
     image = None
     for obj in objects:
         image = object_utils.object_image_guess(obj)
@@ -54,20 +55,20 @@ def image_copy_guess(filepath, objects):
 
 def write_mesh(context, info, report_cb):
     scene = context.scene
+    collection = context.collection
+    layer = context.view_layer
     unit = scene.unit_settings
     print_3d = scene.print_3d
 
-    obj_base = scene.object_bases.active
-    obj = obj_base.object
+    obj = layer.objects.active
 
     export_format = print_3d.export_format
-    global_scale = unit.scale_length if (
-        unit.system != 'NONE' and print_3d.use_apply_scale) else 1.0
+    global_scale = unit.scale_length if (unit.system != 'NONE' and print_3d.use_apply_scale) else 1.0
     path_mode = 'COPY' if print_3d.use_export_texture else 'AUTO'
 
     context_override = context.copy()
 
-    obj_base_tmp = None
+    obj_tmp = None
 
     # PLY can only export single mesh objects!
     if export_format == 'PLY':
@@ -75,14 +76,10 @@ def write_mesh(context, info, report_cb):
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         from . import mesh_helpers
-        obj_base_tmp = mesh_helpers.object_merge(
-            context, context_override["selected_objects"])
-        context_override["active_object"] = obj_base_tmp.object
-        context_override["selected_bases"] = [obj_base_tmp]
-        context_override["selected_objects"] = [obj_base_tmp.object]
+        obj_tmp = mesh_helpers.object_merge(context, context_override["selected_objects"])
+        context_override["active_object"] = obj_tmp
+        context_override["selected_objects"] = [obj_tmp]
     else:
-        if obj_base not in context_override["selected_bases"]:
-            context_override["selected_bases"].append(obj_base)
         if obj not in context_override["selected_objects"]:
             context_override["selected_objects"].append(obj)
 
@@ -173,27 +170,25 @@ def write_mesh(context, info, report_cb):
             global_scale=global_scale,
         )
     else:
-        assert(0)
+        assert 0
 
     # for formats that don't support images
     if export_format in {'STL', 'PLY'}:
         if path_mode == 'COPY':
             image_copy_guess(filepath, context_override["selected_objects"])
 
-    if obj_base_tmp is not None:
-        obj = obj_base_tmp.object
+    if obj_tmp is not None:
+        obj = obj_tmp
         mesh = obj.data
-        scene.objects.unlink(obj)
+        collection.objects.unlink(obj)
         bpy.data.objects.remove(obj)
         bpy.data.meshes.remove(mesh)
-        del obj_base_tmp, obj, mesh
+        del obj_tmp, obj, mesh
 
         # restore context
-        base = None
-        for base in context_backup["selected_bases"]:
-            base.select = True
-        del base
-        scene.objects.active = context_backup["active_object"]
+        for ob in context_backup["selected_objects"]:
+            ob.select_set(True)
+        layer.objects.active = context_backup["active_object"]
 
     if 'FINISHED' in ret:
         info.append(("%r ok" % os.path.basename(filepath), None))

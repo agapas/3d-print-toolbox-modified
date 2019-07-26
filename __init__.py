@@ -22,8 +22,8 @@ bl_info = {
     "name": "3D Print Toolbox Modified",
     "description": "Utilities for 3D printing",
     "author": "Agnieszka Pas",
-    "version": (1, 5, 1),
-    "blender": (2, 78, 0),
+    "version": (2, 0, 0),
+    "blender": (2, 80, 0),
     "location": "3D View > Toolbox",
     "warning": "",
     'wiki_url': 'https://github.com/agapas/3d-print-toolbox-modified#readme',
@@ -35,7 +35,11 @@ if "bpy" in locals():
     import importlib
     importlib.reload(ui)
     importlib.reload(operators)
+    importlib.reload(mesh_helpers)
+    importlib.reload(make_solid_helpers)
 else:
+    import math
+
     import bpy
     from bpy.props import (
         StringProperty,
@@ -47,8 +51,7 @@ else:
         PointerProperty,
     )
     from bpy.types import (
-        Operator,
-        AddonPreferences,
+        # AddonPreferences,
         PropertyGroup,
     )
     from . import (
@@ -56,63 +59,63 @@ else:
         operators,
     )
 
-import math
 
-
-class Print3DSettings(PropertyGroup):
-    export_format = EnumProperty(
+class Print3D_Scene_Props(PropertyGroup):
+    export_format: EnumProperty(
         name="Format",
         description="Format type to export to",
-        items=(('STL', "STL", ""),
-               ('PLY', "PLY", ""),
-               ('WRL', "VRML2", ""),
-               ('X3D', "X3D", ""),
-               ('OBJ', "OBJ", "")),
+        items=(
+            ('STL', "STL", ""),
+            ('PLY', "PLY", ""),
+            ('WRL', "VRML2", ""),
+            ('X3D', "X3D", ""),
+            ('OBJ', "OBJ", "")
+        ),
         default='STL',
     )
-    use_export_texture = BoolProperty(
+    use_export_texture: BoolProperty(
         name="Copy Textures",
         description="Copy textures on export to the output path",
         default=False,
     )
-    use_apply_scale = BoolProperty(
+    use_apply_scale: BoolProperty(
         name="Apply Scale",
         description="Apply scene scale setting on export",
         default=False,
     )
-    export_path = StringProperty(
+    export_path: StringProperty(
         name="Export Directory",
         description="Path to directory where the files are created",
         default="//", maxlen=1024, subtype="DIR_PATH",
     )
-    thickness_min = FloatProperty(
+    thickness_min: FloatProperty(
         name="Thickness",
         description="Minimum thickness",
         subtype='DISTANCE',
         default=0.001,  # 1mm
         min=0.0, max=10.0,
     )
-    threshold_zero = FloatProperty(
+    threshold_zero: FloatProperty(
         name="Threshold",
         description="Limit for checking zero area/length",
         default=0.0001,
         precision=5,
         min=0.0, max=0.2,
     )
-    angle_distort = FloatProperty(
+    angle_distort: FloatProperty(
         name="Angle",
         description="Limit for checking distorted faces",
         subtype='ANGLE',
         default=math.radians(45.0),
         min=0.0, max=math.radians(180.0),
     )
-    angle_sharp = FloatProperty(
+    angle_sharp: FloatProperty(
         name="Angle",
         subtype='ANGLE',
         default=math.radians(160.0),
         min=0.0, max=math.radians(180.0),
     )
-    angle_overhang = FloatProperty(
+    angle_overhang: FloatProperty(
         name="Angle",
         subtype='ANGLE',
         default=math.radians(45.0),
@@ -120,74 +123,39 @@ class Print3DSettings(PropertyGroup):
     )
 
 
-# Addons Preferences Update Panel
-def update_panel(self, context):
-    try:
-        bpy.utils.unregister_class(ui.Print3DToolBarObject)
-        bpy.utils.unregister_class(ui.Print3DToolBarMesh)
-    except:
-        pass
-    ui.Print3DToolBarObject.bl_category = context.user_preferences.addons[
-        __name__].preferences.category
-    bpy.utils.register_class(ui.Print3DToolBarObject)
-    ui.Print3DToolBarMesh.bl_category = context.user_preferences.addons[
-        __name__].preferences.category
-    bpy.utils.register_class(ui.Print3DToolBarMesh)
-
-
-class printpreferences(bpy.types.AddonPreferences):
-    # this must match the addon name, use '__package__'
-    # when defining this in a submodule of a python package.
-    bl_idname = __name__
-
-    category = bpy.props.StringProperty(
-        name="Tab Category",
-        description="Choose a name for the category of the panel",
-        default="3D Printing",
-        update=update_panel)
-
-    def draw(self, context):
-
-        layout = self.layout
-        row = layout.row()
-        col = row.column()
-        col.label(text="Tab Category:")
-        col.prop(self, "category", text="")
-
 classes = (
-    ui.Print3DToolBarObject,
-    ui.Print3DToolBarMesh,
+    ui.VIEW3D_PT_Print3D_Object_Modified, # Print3DToolBarObject,
+    ui.VIEW3D_PT_Print3D_Mesh_Modified, # Print3DToolBarMesh,
 
-    operators.Print3DInfoVolume,
-    operators.Print3DInfoArea,
-    operators.Print3DSelectReport,
-    operators.Print3DCopyVolumeToClipboard,
-    operators.Print3DCopyAreaToClipboard,
+    operators.MESH_OT_Print3D_Info_Volume, # Print3DInfoVolume,
+    operators.MESH_OT_Print3D_Info_Area, # Print3DInfoArea,
+    operators.MESH_OT_Print3D_Select_Report, # Print3DSelectReport,
+    operators.MESH_OT_Print3D_Copy_Volume_To_Clipboard, # Print3DCopyVolumeToClipboard, #
+    operators.MESH_OT_Print3D_Copy_Area_To_Clipboard, # Print3DCopyAreaToClipboard, #
 
-    operators.Print3DCheckDegenerate,
-    operators.Print3DCheckDistorted,
-    operators.Print3DCheckSolid,
-    operators.Print3DCheckIntersections,
-    operators.Print3DCheckThick,
-    operators.Print3DCheckSharp,
-    operators.Print3DCheckOverhang,
-    operators.Print3DCheckAll,
+    operators.MESH_OT_Print3D_Check_Degenerate, # Print3DCheckDegenerate,
+    operators.MESH_OT_Print3D_Check_Distorted, # Print3DCheckDistorted,
+    operators.MESH_OT_Print3D_Check_Solid, # Print3DCheckSolid,
+    operators.MESH_OT_Print3D_Check_Intersections, # Print3DCheckIntersections,
+    operators.MESH_OT_Print3D_Check_Thick, # Print3DCheckThick,
+    operators.MESH_OT_Print3D_Check_Sharp, # Print3DCheckSharp,
+    operators.MESH_OT_Print3D_Check_Overhang, # Print3DCheckOverhang,
+    operators.MESH_OT_Print3D_Check_All, # Print3DCheckAll,
 
-    operators.Print3DCleanDegenerates,
-    operators.Print3DCleanLoose,
-    operators.Print3DCleanDoubles,
-    operators.Print3DCleanNonPlanars,
-    operators.Print3DCleanConcave,
-    operators.Print3DCleanTriangulateFaces,
-    operators.Print3DCleanHoles,
-    operators.Print3DCleanLimited,
+    operators.MESH_OT_Print3D_Clean_Degenerates, # Print3DCleanDegenerates, #
+    operators.MESH_OT_Print3D_Clean_Loose, # Print3DCleanLoose, #
+    operators.MESH_OT_Print3D_Clean_Doubles, # Print3DCleanDoubles, #
+    operators.MESH_OT_Print3D_Clean_Non_Planars, # Print3DCleanNonPlanars, #
+    operators.MESH_OT_Print3D_Clean_Concave, # Print3DCleanConcave, #
+    operators.MESH_OT_Print3D_Clean_Triangulate_Faces, # Print3DCleanTriangulateFaces, #
+    operators.MESH_OT_Print3D_Clean_Holes, # Print3DCleanHoles, #
+    operators.MESH_OT_Print3D_Clean_Limited, # Print3DCleanLimited, #
 
-    operators.Print3DExport,
+    operators.MESH_OT_Print3D_Export, # Print3DExport,
 
-    operators.MakeSolidFromSelected,
+    operators.MESH_OT_Print3D_Make_Solid_From_Selected, # MakeSolidFromSelected, #
 
-    Print3DSettings,
-    printpreferences,
+    Print3D_Scene_Props, # Print3DSettings
 )
 
 
@@ -195,7 +163,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.print_3d = PointerProperty(type=Print3DSettings)
+    bpy.types.Scene.print_3d = PointerProperty(type=Print3D_Scene_Props)
 
 
 def unregister():
