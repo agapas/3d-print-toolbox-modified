@@ -46,9 +46,10 @@ def prepare_meshes():
 
 def prepare_mesh(obj, select_action):
 	scene = bpy.context.scene
+	layer = bpy.context.view_layer
 
-	active_object = bpy.context.active_object
-	scene.objects.active = obj
+	active_object = layer.objects.active
+	layer.objects.active = obj
 	bpy.ops.object.mode_set(mode='EDIT')
 
 	# reveal hidden vertices in mesh
@@ -71,15 +72,15 @@ def prepare_mesh(obj, select_action):
 	# back to previous settings
 	bpy.ops.mesh.select_all(action=select_action)
 	bpy.ops.object.mode_set(mode='OBJECT')
-	scene.objects.active = active_object
+	layer.objects.active = active_object
 
 
 def cleanup_mesh(obj):
 	mesh = obj.data
 	bm = bmesh.new()
-	bm.from_mesh(mesh=mesh)
-	bmesh.ops.remove_doubles(bm=bm, verts=bm.verts, dist=0.0001)
-	bm.to_mesh(mesh=mesh)
+	bm.from_mesh(mesh)
+	bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0001)
+	bm.to_mesh(mesh)
 	bm.free()
 
 
@@ -97,10 +98,15 @@ def add_modifier(active, selected):
 	bpy.ops.object.modifier_apply(modifier='Boolean')
 
 	# bpy.context.scene.objects.unlink(selected)
-	layer = context.view_layer
-	layer_collection = context.layer_collection or layer.active_layer_collection
-	scene_collection = layer_collection.collection
-	scene_collection.objects.unlink(selected)
+	# bpy.data.objects.remove(selected)
+
+	view_layer = bpy.context.view_layer
+	print ("layer_collection.name = " + bpy.context.layer_collection.name)
+	print ("view_layer.active_layer_collection.name = " + view_layer.active_layer_collection.name)
+	layer_collection = bpy.context.layer_collection or view_layer.active_layer_collection
+	collection = layer_collection.collection
+	collection.objects.unlink(selected)
+
 	bpy.data.objects.remove(selected)
 
 
@@ -120,7 +126,7 @@ def make_solid_batch():
 def is_manifold(self):
 	mesh = bpy.context.active_object.data
 	bm = bmesh.new()
-	bm.from_mesh(mesh=mesh)
+	bm.from_mesh(mesh)
 
 	for edge in bm.edges:
 		if not edge.is_manifold:

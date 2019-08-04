@@ -51,7 +51,6 @@ else:
         PointerProperty,
     )
     from bpy.types import (
-        # AddonPreferences,
         PropertyGroup,
     )
     from . import (
@@ -124,38 +123,38 @@ class Print3D_Scene_Props(PropertyGroup):
 
 
 classes = (
-    ui.VIEW3D_PT_Print3D_Object_Modified, # Print3DToolBarObject,
-    ui.VIEW3D_PT_Print3D_Mesh_Modified, # Print3DToolBarMesh,
+    ui.VIEW3D_PT_Print3D_Object_Modified,
+    ui.VIEW3D_PT_Print3D_Mesh_Modified,
 
-    operators.MESH_OT_Print3D_Info_Volume, # Print3DInfoVolume,
-    operators.MESH_OT_Print3D_Info_Area, # Print3DInfoArea,
-    operators.MESH_OT_Print3D_Select_Report, # Print3DSelectReport,
-    operators.MESH_OT_Print3D_Copy_Volume_To_Clipboard, # Print3DCopyVolumeToClipboard, #
-    operators.MESH_OT_Print3D_Copy_Area_To_Clipboard, # Print3DCopyAreaToClipboard, #
+    operators.MESH_OT_Print3D_Info_Volume,
+    operators.MESH_OT_Print3D_Info_Area,
+    operators.MESH_OT_Print3D_Select_Report,
+    operators.MESH_OT_Print3D_Copy_Volume_To_Clipboard,
+    operators.MESH_OT_Print3D_Copy_Area_To_Clipboard,
 
-    operators.MESH_OT_Print3D_Check_Degenerate, # Print3DCheckDegenerate,
-    operators.MESH_OT_Print3D_Check_Distorted, # Print3DCheckDistorted,
-    operators.MESH_OT_Print3D_Check_Solid, # Print3DCheckSolid,
-    operators.MESH_OT_Print3D_Check_Intersections, # Print3DCheckIntersections,
-    operators.MESH_OT_Print3D_Check_Thick, # Print3DCheckThick,
-    operators.MESH_OT_Print3D_Check_Sharp, # Print3DCheckSharp,
-    operators.MESH_OT_Print3D_Check_Overhang, # Print3DCheckOverhang,
-    operators.MESH_OT_Print3D_Check_All, # Print3DCheckAll,
+    operators.MESH_OT_Print3D_Check_Degenerate,
+    operators.MESH_OT_Print3D_Check_Distorted,
+    operators.MESH_OT_Print3D_Check_Solid,
+    operators.MESH_OT_Print3D_Check_Intersections,
+    operators.MESH_OT_Print3D_Check_Thick,
+    operators.MESH_OT_Print3D_Check_Sharp,
+    operators.MESH_OT_Print3D_Check_Overhang,
+    operators.MESH_OT_Print3D_Check_All,
 
-    operators.MESH_OT_Print3D_Clean_Degenerates, # Print3DCleanDegenerates, #
-    operators.MESH_OT_Print3D_Clean_Loose, # Print3DCleanLoose, #
-    operators.MESH_OT_Print3D_Clean_Doubles, # Print3DCleanDoubles, #
-    operators.MESH_OT_Print3D_Clean_Non_Planars, # Print3DCleanNonPlanars, #
-    operators.MESH_OT_Print3D_Clean_Concave, # Print3DCleanConcave, #
-    operators.MESH_OT_Print3D_Clean_Triangulate_Faces, # Print3DCleanTriangulateFaces, #
-    operators.MESH_OT_Print3D_Clean_Holes, # Print3DCleanHoles, #
-    operators.MESH_OT_Print3D_Clean_Limited, # Print3DCleanLimited, #
+    operators.MESH_OT_Print3D_Clean_Degenerates,
+    operators.MESH_OT_Print3D_Clean_Loose,
+    operators.MESH_OT_Print3D_Clean_Doubles,
+    operators.MESH_OT_Print3D_Clean_Non_Planars,
+    operators.MESH_OT_Print3D_Clean_Concave,
+    operators.MESH_OT_Print3D_Clean_Triangulate_Faces,
+    operators.MESH_OT_Print3D_Clean_Holes,
+    operators.MESH_OT_Print3D_Clean_Limited,
 
-    operators.MESH_OT_Print3D_Export, # Print3DExport,
+    operators.MESH_OT_Print3D_Export,
 
-    operators.MESH_OT_Print3D_Make_Solid_From_Selected, # MakeSolidFromSelected, #
+    operators.MESH_OT_Print3D_Make_Solid_From_Selected,
 
-    Print3D_Scene_Props, # Print3DSettings
+    Print3D_Scene_Props,
 )
 
 

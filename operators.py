@@ -736,7 +736,7 @@ class MESH_OT_Print3D_Make_Solid_From_Selected(Operator):
 	mode: 'UNION'
 
 	def execute(self, context):
-		active = context.active_object
+		active = context.view_layer.objects.active
 		selected = context.selected_objects
 
 		if active is None or len(selected) < 2:

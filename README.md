@@ -13,6 +13,9 @@ Images below display original '3D Print Toolbox' (image on the left) and current
   <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="200" height="600" />
 </p>
 
+NOTE:
+'Make Solid' works so far only if all selected objects are in the same collection. The full fix for the issue is in 'work in progress'.
+
 #### Added Features
 
 * added [make-solid](https://github.com/agapas/make-solid)
