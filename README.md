@@ -14,7 +14,7 @@ Images below display original '3D Print Toolbox' (image on the left) and current
 </p>
 
 NOTE:
-'Make Solid' works so far only if all selected objects are in the same collection. The full fix for the issue is in 'work in progress'.
+'Make Solid' works so far only if all selected objects are in the same collection. I'm still working on the full fix for the issue.
 
 #### Added Features
 

@@ -84,7 +84,7 @@ def bmesh_to_object(obj, bm):
     me = obj.data
     is_editmode = (obj.mode == 'EDIT')
     if is_editmode:
-        bmesh.update_edit_mesh(me, True)
+        bmesh.update_edit_mesh(me, loop_triangles=True)
     else:
         bm.to_mesh(me)
     # grr... cause an update
@@ -219,7 +219,7 @@ def bmesh_check_thick_object(obj, thickness):
     bpy.data.objects.remove(obj_tmp)
     bpy.data.meshes.remove(me_tmp)
 
-    scene.update()
+    layer.update()
 
     return array.array('i', faces_error)
 

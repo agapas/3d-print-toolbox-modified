@@ -97,9 +97,6 @@ def add_modifier(active, selected):
 
 	bpy.ops.object.modifier_apply(modifier='Boolean')
 
-	# bpy.context.scene.objects.unlink(selected)
-	# bpy.data.objects.remove(selected)
-
 	view_layer = bpy.context.view_layer
 	print ("layer_collection.name = " + bpy.context.layer_collection.name)
 	print ("view_layer.active_layer_collection.name = " + view_layer.active_layer_collection.name)
