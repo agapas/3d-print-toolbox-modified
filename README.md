@@ -2,8 +2,39 @@
 Blender addon with utilities for 3d printing. It's based on '3D Print Toolbox' by Campbell Barton. In this modified version it's possible to have more influence on the clean up settings and it gives more flexibility.
 
 ### Blender version:
-Tested on Blender 2.80 Release Candidate 3 (windows64).
+Any new mods going forward will be using Blender 2.92.
+The original (forked code) was tested on Blender 2.80 Release Candidate 3 (windows64).
 If you need version for Blender 2.79 or older, check the link: [3d-print-toolbox-modified-blender2.79](https://github.com/agapas/3d-print-toolbox-modified-blender2.79)
+
+
+### Other useful informmation
+A webseries on precision Modeling & Blender 
+https://www.youtube.com/playlist?list=PL6Fiih6ItYsXzUbBNz7-IvV7UJYHZzCdF
+
+Notes on 3d print toolbox in blender
+-	Only visible in edit mode
+-	Shows in the 3d window RHS edge menu (called 3D-print). If it’s not showing try clicking the little triangle in the top RH corner of the viewport
+
+Other useful Blender Plugins
+Booltool
+-	Only visible in object mode
+-	Shows under Edit in RHS edge menu – if not showing click the down triangle at the top
+-	Can use to view slices through plane by creating a cube, select it then another object then selecting difference. Dragging the cube around will cut through the object
+-	To move the cube origin used shift-s position 3d cursor to origin, then R-click on object, set origin to 3d cursor.
+-	Use the move tool (either click the 4-arrow tool on RHS or shift-space, G (move tool)
+
+Measure tool:  (this is automatically part of Blender 2.9)
+
+Precision Drawing Tools - https://www.youtube.com/watch?v=8a4mm-zb3nk
+Add Mesh: Extra Objects
+Mesh: Looptools
+MeasureIt
+
+
+
+
+
+
 
 ### More info:
 Images below display original '3D Print Toolbox' (image on the left) and current modified version (image on the right):
