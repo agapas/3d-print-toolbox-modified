@@ -18,17 +18,26 @@
 
 # <pep8-80 compliant>
 
+
+# 2019 - forked by Agnieszka Pas to: https://github.com/agapas/3d-print-toolbox-modified
+#      - added various repair tools (but not merged with main branch)
+# 2020 - Blender official version updated
+# 2021 - forked 2020 official version and merged Agnieszka updates
+
+
+
 bl_info = {
-    "name": "3D Print Toolbox Modified",
+    "name": "3D Print Toolbox",
     "description": "Utilities for 3D printing",
-    "author": "Agnieszka Pas",
-    "version": (2, 0, 0),
+    "author": "Campbell Barton, Agnieszka Pas, David Mckenzie",
+    "version": (2, 1, 2),
     "blender": (2, 80, 0),
-    "location": "3D View > Toolbox",
+    "location": "3D View > Sidebar",
     "warning": "",
-    'wiki_url': 'https://github.com/agapas/3d-print-toolbox-modified#readme',
+    'wiki_url': '{BLENDER_MANUAL_URL}/addons/mesh/3d_print_toolbox.html',
     "category": "Mesh"
 }
+
 
 
 if "bpy" in locals():
@@ -36,39 +45,37 @@ if "bpy" in locals():
     importlib.reload(ui)
     importlib.reload(operators)
     importlib.reload(mesh_helpers)
-    importlib.reload(make_solid_helpers)
+    if "export" in locals():
+        importlib.reload(export)
 else:
     import math
 
     import bpy
+    from bpy.types import PropertyGroup
     from bpy.props import (
         StringProperty,
         BoolProperty,
-        IntProperty,
         FloatProperty,
-        FloatVectorProperty,
         EnumProperty,
         PointerProperty,
     )
-    from bpy.types import (
-        PropertyGroup,
-    )
+
     from . import (
         ui,
         operators,
     )
 
 
-class Print3D_Scene_Props(PropertyGroup):
+
+class SceneProperties(PropertyGroup):
     export_format: EnumProperty(
         name="Format",
         description="Format type to export to",
         items=(
             ('STL', "STL", ""),
             ('PLY', "PLY", ""),
-            ('WRL', "VRML2", ""),
             ('X3D', "X3D", ""),
-            ('OBJ', "OBJ", "")
+            ('OBJ', "OBJ", ""),
         ),
         default='STL',
     )
@@ -85,76 +92,90 @@ class Print3D_Scene_Props(PropertyGroup):
     export_path: StringProperty(
         name="Export Directory",
         description="Path to directory where the files are created",
-        default="//", maxlen=1024, subtype="DIR_PATH",
+        default="//",
+        maxlen=1024,
+        subtype="DIR_PATH",
     )
     thickness_min: FloatProperty(
         name="Thickness",
         description="Minimum thickness",
         subtype='DISTANCE',
         default=0.001,  # 1mm
-        min=0.0, max=10.0,
+        min=0.0,
+        max=10.0,
     )
     threshold_zero: FloatProperty(
         name="Threshold",
         description="Limit for checking zero area/length",
         default=0.0001,
         precision=5,
-        min=0.0, max=0.2,
+        min=0.0,
+        max=0.2,
     )
     angle_distort: FloatProperty(
         name="Angle",
         description="Limit for checking distorted faces",
         subtype='ANGLE',
         default=math.radians(45.0),
-        min=0.0, max=math.radians(180.0),
+        min=0.0,
+        max=math.radians(180.0),
     )
     angle_sharp: FloatProperty(
         name="Angle",
         subtype='ANGLE',
         default=math.radians(160.0),
-        min=0.0, max=math.radians(180.0),
+        min=0.0,
+        max=math.radians(180.0),
     )
     angle_overhang: FloatProperty(
         name="Angle",
         subtype='ANGLE',
         default=math.radians(45.0),
-        min=0.0, max=math.radians(90.0),
+        min=0.0,
+        max=math.radians(90.0),
     )
 
 
+
 classes = (
-    ui.VIEW3D_PT_Print3D_Object_Modified,
-    ui.VIEW3D_PT_Print3D_Mesh_Modified,
+    SceneProperties,
 
-    operators.MESH_OT_Print3D_Info_Volume,
-    operators.MESH_OT_Print3D_Info_Area,
-    operators.MESH_OT_Print3D_Select_Report,
-    operators.MESH_OT_Print3D_Copy_Volume_To_Clipboard,
-    operators.MESH_OT_Print3D_Copy_Area_To_Clipboard,
+    ui.VIEW3D_PT_print3d_analyze,
+    ui.VIEW3D_PT_print3d_cleanup,
+    ui.VIEW3D_PT_print3d_transform,
+    ui.VIEW3D_PT_print3d_export,
+    ui.VIEW3D_PT_print3d_workarea,
 
-    operators.MESH_OT_Print3D_Check_Degenerate,
-    operators.MESH_OT_Print3D_Check_Distorted,
-    operators.MESH_OT_Print3D_Check_Solid,
-    operators.MESH_OT_Print3D_Check_Intersections,
-    operators.MESH_OT_Print3D_Check_Thick,
-    operators.MESH_OT_Print3D_Check_Sharp,
-    operators.MESH_OT_Print3D_Check_Overhang,
-    operators.MESH_OT_Print3D_Check_All,
+    operators.MESH_OT_print3d_info_volume,
+    operators.MESH_OT_print3d_info_area,
+    operators.MESH_OT_print3d_check_degenerate,
+    operators.MESH_OT_print3d_check_distorted,
+    operators.MESH_OT_print3d_check_solid,
+    operators.MESH_OT_print3d_check_intersections,
+    operators.MESH_OT_print3d_check_thick,
+    operators.MESH_OT_print3d_check_sharp,
+    operators.MESH_OT_print3d_check_overhang,
+    operators.MESH_OT_print3d_check_all,
 
-    operators.MESH_OT_Print3D_Clean_Degenerates,
-    operators.MESH_OT_Print3D_Clean_Loose,
-    operators.MESH_OT_Print3D_Clean_Doubles,
-    operators.MESH_OT_Print3D_Clean_Non_Planars,
-    operators.MESH_OT_Print3D_Clean_Concave,
-    operators.MESH_OT_Print3D_Clean_Triangulate_Faces,
-    operators.MESH_OT_Print3D_Clean_Holes,
-    operators.MESH_OT_Print3D_Clean_Limited,
+    operators.MESH_OT_print3d_clean_distorted,
+    operators.MESH_OT_print3d_clean_thin,
+    operators.MESH_OT_print3d_clean_non_manifold,
 
-    operators.MESH_OT_Print3D_Export,
+    operators.MESH_OT_print3d_clean_degenerates,
+    operators.MESH_OT_print3d_clean_doubles,
+    operators.MESH_OT_print3d_clean_loose,
+    operators.MESH_OT_print3d_clean_non_planars,
+    operators.MESH_OT_print3d_clean_concaves,
+    operators.MESH_OT_print3d_clean_triangulates,
+    operators.MESH_OT_print3d_clean_holes,
+    operators.MESH_OT_print3d_clean_limited,
 
-    operators.MESH_OT_Print3D_Make_Solid_From_Selected,
 
-    Print3D_Scene_Props,
+    operators.MESH_OT_print3d_select_report,
+    operators.MESH_OT_print3d_scale_to_volume,
+    operators.MESH_OT_print3d_scale_to_bounds,
+
+    operators.MESH_OT_print3d_export,
 )
 
 
@@ -162,7 +183,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.print_3d = PointerProperty(type=Print3D_Scene_Props)
+    bpy.types.Scene.print_3d = PointerProperty(type=SceneProperties)
 
 
 def unregister():

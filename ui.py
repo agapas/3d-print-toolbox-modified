@@ -18,10 +18,8 @@
 
 # <pep8-80 compliant>
 
-#----------------------------------------------------------
-# File ui.py
 # Interface for this addon.
-#----------------------------------------------------------
+
 
 from bpy.types import Panel
 import bmesh
@@ -29,10 +27,19 @@ import bmesh
 from . import report
 
 
-class Print3D_ToolBar:
-    bl_label = "Print3D"
+class View3DPrintPanel:
+    bl_category = "3D-Print"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return obj is not None and obj.type == 'MESH' and obj.mode in {'OBJECT', 'EDIT'}
+
+
+class VIEW3D_PT_print3d_analyze(View3DPrintPanel, Panel):
+    bl_label = "Analyze"
 
     _type_to_icon = {
         bmesh.types.BMVert: 'VERTEXSEL',
@@ -40,135 +47,176 @@ class Print3D_ToolBar:
         bmesh.types.BMFace: 'FACESEL',
     }
 
-    _check_all_icon = 'FORCE_VORTEX'
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and obj.type == 'MESH')
-
-    @staticmethod
-    def draw_report(layout, context):
-        """Display Reports"""
+    def draw_report(self, context):
+        layout = self.layout
         info = report.info()
-        if info:
-            obj = context.edit_object
 
-            layout.label(text="Output:")
+        if info:
+            is_edit = context.edit_object is not None
+
+            layout.label(text="Result")
             box = layout.box()
-            col = box.column(align=False)
+            col = box.column()
+
             for i, (text, data) in enumerate(info):
-                if obj and data and data[1]:
-                    bm_type, bm_array = data
-                    col.operator("mesh.print3d_select_report",
-                        text=text,
-                        icon=Print3D_ToolBar._type_to_icon[bm_type]).index = i
-                elif 'Volume:' in text:
-                    rowsub = col.row(align=True)
-                    rowsub.label(text=text)
-                    rowsub.operator("mesh.print3d_copy_volume_to_clipboard", text="", icon='COPYDOWN').volume = text
-                elif 'Area:' in text:
-                    rowsub = col.row(align=True)
-                    rowsub.label(text=text)
-                    rowsub.operator("mesh.print3d_copy_area_to_clipboard", text="", icon='COPYDOWN').area = text
+                if is_edit and data and data[1]:
+                    bm_type, _bm_array = data
+                    col.operator("mesh.print3d_select_report", text=text, icon=self._type_to_icon[bm_type],).index = i
                 else:
                     col.label(text=text)
-
 
     def draw(self, context):
         layout = self.layout
 
-        scene = context.scene
-        print_3d = scene.print_3d
+        print_3d = context.scene.print_3d
 
-        row = layout.row()
-        layout.label(text="Statistics:")
-        rowsub = layout.row(align=True)
-        rowsub.operator("mesh.print3d_info_volume", text="Volume")
-        rowsub.operator("mesh.print3d_info_area", text="Area")
-        layout.separator()
+        layout.label(text="TODO:")
+        layout.label(text="Presets")
 
-        box = layout.box()
-        col = box.column()
-        col.operator("object.make_solid", text="Make Solid")
 
-        row = layout.row()
-        row.label(text="Checks:")
+        layout.label(text="Statistics")
+        row = layout.row(align=True)
+        #TODO: add the stats here when button clicked rather than down in the report section
+        row.operator("mesh.print3d_info_volume", text="Volume: TODO")
+#        row.prop(print_3d, "area", text="")
+        row.operator("mesh.print3d_info_area", text="Area: TODO")
+#        row.prop(print_3d, "area", text="")
+
+        layout.label(text="Checks")
         col = layout.column(align=True)
         col.operator("mesh.print3d_check_solid", text="Solid")
         col.operator("mesh.print3d_check_intersect", text="Intersections")
-        rowsub = col.row(align=True)
-        rowsub.operator("mesh.print3d_check_degenerate", text="Degenerate")
-        rowsub.prop(print_3d, "threshold_zero", text="")
-        rowsub = col.row(align=True)
-        rowsub.operator("mesh.print3d_check_distort", text="Distorted")
-        rowsub.prop(print_3d, "angle_distort", text="")
-        rowsub = col.row(align=True)
-        rowsub.operator("mesh.print3d_check_thick", text="Thickness")
-        rowsub.prop(print_3d, "thickness_min", text="")
-        rowsub = col.row(align=True)
-        rowsub.operator("mesh.print3d_check_sharp", text="Edge Sharp")
-        rowsub.prop(print_3d, "angle_sharp", text="")
-        rowsub = col.row(align=True)
-        rowsub.operator("mesh.print3d_check_overhang", text="Overhang")
-        rowsub.prop(print_3d, "angle_overhang", text="")
+        row = col.row(align=True)
+        row.operator("mesh.print3d_check_degenerate", text="Degenerate")
+        row.prop(print_3d, "threshold_zero", text="")
+        row = col.row(align=True)
+        row.operator("mesh.print3d_check_distort", text="Distorted")
+        row.prop(print_3d, "angle_distort", text="")
+        row = col.row(align=True)
+        row.operator("mesh.print3d_check_thick", text="Thickness")
+        row.prop(print_3d, "thickness_min", text="")
+        row = col.row(align=True)
+        row.operator("mesh.print3d_check_sharp", text="Edge Sharp")
+        row.prop(print_3d, "angle_sharp", text="")
+        row = col.row(align=True)
+        row.operator("mesh.print3d_check_overhang", text="Overhang")
+        row.prop(print_3d, "angle_overhang", text="")
+        row = col.row(align=True)
+        layout.label(text="TODO:")
+        row = col.row(align=True)
+        layout.label(text="print3d_check_islands+orphans")        
+        row = col.row(align=True)
+        layout.label(text="print3d_check_weak_structures")        
+        row = col.row(align=True)
+        layout.label(text="print3d_check_resin_traps")  
+        row = col.row(align=True)
+        layout.label(text="print3d_check_touching_boundaries")  
+
+        layout.operator("mesh.print3d_check_all", text="Check All")
+
+        self.draw_report(context)
+
+
+class VIEW3D_PT_print3d_cleanup(View3DPrintPanel, Panel):
+    bl_label = "Clean Up"
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+
+        print_3d = context.scene.print_3d
+
+        row = layout.row(align=True)
+        row.operator("mesh.print3d_clean_distorted", text="Distorted")
+        row.prop(print_3d, "angle_distort", text="")
+        layout.operator("mesh.print3d_clean_non_manifold", text="Make Manifold")
+
+        #Agnieszka Pas Cleaners
+        layout.operator("mesh.print3d_clean_degenerates", text="Dissolve Degenerates")
+        layout.operator("mesh.print3d_clean_doubles", text="Remove Doubles")
+        layout.operator("mesh.print3d_clean_loose", text="Delete Loose")
+        layout.operator("mesh.print3d_clean_non_planars", text="Split Non Planar Faces")
+        layout.operator("mesh.print3d_clean_concaves", text="Split Concave Faces")
+        layout.operator("mesh.print3d_clean_triangulates", text="Triangulate Faces")
+        layout.operator("mesh.print3d_clean_holes", text="Fill Holes")
+        layout.operator("mesh.print3d_clean_limited", text="Simplify Mesh (Limited Dissolve)")
+
+        layout.label(text="TODO:")
+        layout.label(text="print3d_clean_resin_traps")
+        layout.label(text="print3d_clean_thin")
+        layout.label(text="print3d_clean_fix_orphans")
+        layout.label(text="print3d_clean_normals_out")
+
+        '''
+
+        # XXX TODO
+
+        layout.operator("mesh.print3d_clean_thin", text="Wall Thickness")
+        layout.operator("mesh.print3d_clean_normals_out", text="Normals to Outside")
+        '''
+
+
+class VIEW3D_PT_print3d_transform(View3DPrintPanel, Panel):
+    bl_label = "Transform"
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.label(text="print3d_add_supports")
+
+        layout.label(text="Scale To:-")
+        row = layout.row(align=True)
+        row.operator("mesh.print3d_scale_to_volume", text="Volume")
+        row.operator("mesh.print3d_scale_to_bounds", text="Bounds")
+
+        row = layout.row(align=True)
+        layout.label(text="TODO: print3d_merge_selected_into_single_solid")
+
+#        row.operator("mesh.print3d_merge_selected_into_single_solid", text="Merge To Solid")
+
+class VIEW3D_PT_print3d_export(View3DPrintPanel, Panel):
+    bl_label = "Export"
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        print_3d = context.scene.print_3d
+
+        layout.prop(print_3d, "export_path", text="")
 
         col = layout.column()
-        col.operator("mesh.print3d_check_all",
-            text="CHECK ALL",
-            icon=Print3D_ToolBar._check_all_icon)
+        col.prop(print_3d, "use_apply_scale")
+        col.prop(print_3d, "use_export_texture")
 
-        # Added mesh clean up operators:
-        row = layout.row()
-        row.label(text="Clean up:")
+        layout.prop(print_3d, "export_format")
+        layout.operator("mesh.print3d_export", text="Export", icon='EXPORT')
 
-        box = layout.box()
-        col = box.column()
-        col.operator("mesh.print3d_clean_degenerates", text="Degenerate Dissolve")
-        col = box.column()
-        col.operator("mesh.print3d_clean_doubles", text="Remove Doubles")
-        col = box.column()
-        col.operator("mesh.print3d_clean_loose", text="Delete Loose")
-        col = box.column()
-        col.operator("mesh.print3d_clean_non_planars", text="Split Non Planar Faces")
-        col = box.column()
-        col.operator("mesh.print3d_clean_concaves", text="Split Concave Faces")
-        col = box.column()
-        col.operator("mesh.print3d_clean_triangulates", text="Triangulate Faces")
-        col = box.column()
-        col.operator("mesh.print3d_clean_holes", text="Fill Holes")
-        col = box.column()
-        col.operator("mesh.print3d_clean_limited", text="Limited Dissolve")
-
-        Print3D_ToolBar.draw_report(layout, context)
-        layout.separator()
-
-        col = layout.column()
-        rowsub = col.row(align=True)
-        rowsub.label(text="Export Path:")
-        rowsub.prop(print_3d, "use_apply_scale", text="", icon='ORIENTATION_GLOBAL')
-        rowsub.prop(print_3d, "use_export_texture", text="", icon='FILE_IMAGE')
-        rowsub = col.row()
-        rowsub.prop(print_3d, "export_path", text="")
-
-        rowsub = col.row(align=True)
-        rowsub.prop(print_3d, "export_format", text="")
-        rowsub.operator("mesh.print3d_export", text="Export", icon='EXPORT')
+        layout.label(text="TODO: export direct to SLA voxel format")
 
 
-# Showing panel in object mode
-class VIEW3D_PT_Print3D_Object_Modified(Panel, Print3D_ToolBar):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "3D Printing"
-    bl_idname = "VIEW3D_PT_print3d_object_modified"
-    bl_context = "objectmode"
+#DGM TODO: Merge this in
+class VIEW3D_PT_print3d_workarea(View3DPrintPanel, Panel):
+    bl_label = "Generate Workarea"
+    bl_options = {"DEFAULT_CLOSED"}
 
+    def draw(self, context):
+        layout = self.layout
+        print_3d = context.scene.print_3d
 
-# Showing panel in edit mode
-class VIEW3D_PT_Print3D_Mesh_Modified(Panel, Print3D_ToolBar):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "3D Printing"
-    bl_idname = "VIEW3D_PT_print3d_mesh_modified"
-    bl_context = "mesh_edit"
+        col = layout.column(align=True)
+        layout.label(text="TODO:")
+        layout.label(text="print3d_setup_illuminate")
+        layout.label(text="print3d_setup_printer_bed")
+        layout.label(text="print3d_setup_printer_volume")
+        layout.label(text="print3d_setup_printer_resolution")
+
+        '''
+        layout.operator("mesh.print3d_setup_illuminate", text="Illuminate Visible")
+        layout.operator("mesh.print3d_setup_printer_bed", text="Add Printer Bed")
+        layout.operator("mesh.print3d_setup_printer_volume", text="Add Printer Volume")
+        layout.operator("mesh.print3d_setup_printer_resolution", text="Set Printer Resolution")
+        '''

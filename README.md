@@ -51,8 +51,13 @@ MeasureIt
 
 
 
-
-
+A 3d printer workarea - this is for specific printer, but you can modify it to suit your own.
+Since it's very simple, adding this to the scene will be scripted rather than requiring an entire .blend file
+(Possibly as an application template https://docs.blender.org/manual/en/latest/advanced/app_templates.html)
+But if you primarily use Blender for 3D printing then, you can use your modified version to overwrite your startup via File/Defaults/Save Startup File
+<p align="left">
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/PrinterWorkarea.png" title="current version" width="200" height="600" />
+</p>
 
 
 ### More info:

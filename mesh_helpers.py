@@ -18,20 +18,16 @@
 
 # <pep8-80 compliant>
 
-#----------------------------------------------------------
-# File mesh_helpers.py
 # Generic helper functions, to be used by any modules.
-#----------------------------------------------------------
+
 
 import bmesh
 
 
 def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifiers=False):
-    """
-    Returns a transformed, triangulated copy of the mesh
-    """
+    """Returns a transformed, triangulated copy of the mesh"""
 
-    assert(obj.type == 'MESH')
+    assert obj.type == 'MESH'
 
     if apply_modifiers and obj.modifiers:
         import bpy
@@ -41,7 +37,6 @@ def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifier
         bm = bmesh.new()
         bm.from_mesh(me)
         obj_eval.to_mesh_clear()
-        del bpy
     else:
         me = obj.data
         if obj.mode == 'EDIT':
@@ -64,47 +59,36 @@ def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifier
 
 
 def bmesh_from_object(obj):
-    """
-    Object/Edit Mode get mesh, use bmesh_to_object() to write back.
-    """
+    """Object/Edit Mode get mesh, use bmesh_to_object() to write back."""
     me = obj.data
-    is_editmode = (obj.mode == 'EDIT')
-    if is_editmode:
+
+    if obj.mode == 'EDIT':
         bm = bmesh.from_edit_mesh(me)
     else:
         bm = bmesh.new()
         bm.from_mesh(me)
+
     return bm
 
 
 def bmesh_to_object(obj, bm):
-    """
-    Object/Edit Mode update the object.
-    """
+    """Object/Edit Mode update the object."""
     me = obj.data
-    is_editmode = (obj.mode == 'EDIT')
-    if is_editmode:
-        bmesh.update_edit_mesh(me, loop_triangles=True)
+
+    if obj.mode == 'EDIT':
+        bmesh.update_edit_mesh(me, True)
     else:
         bm.to_mesh(me)
-    # grr... cause an update
-    if me.vertices:
-        me.vertices[0].co[0] = me.vertices[0].co[0]
+        me.update()
 
 
 def bmesh_calc_area(bm):
-    """
-    Calculate the surface area.
-    """
+    """Calculate the surface area."""
     return sum(f.calc_area() for f in bm.faces)
 
 
 def bmesh_check_self_intersect_object(obj):
-    """
-    Check if any faces self intersect
-
-    returns an array of edge index values.
-    """
+    """Check if any faces self intersect returns an array of edge index values."""
     import array
     import mathutils
 
@@ -122,14 +106,14 @@ def bmesh_check_self_intersect_object(obj):
 def bmesh_face_points_random(f, num_points=1, margin=0.05):
     import random
     from random import uniform
-    uniform_args = 0.0 + margin, 1.0 - margin
 
     # for pradictable results
     random.seed(f.index)
 
+    uniform_args = 0.0 + margin, 1.0 - margin
     vecs = [v.co for v in f.verts]
 
-    for i in range(num_points):
+    for _ in range(num_points):
         u1 = uniform(*uniform_args)
         u2 = uniform(*uniform_args)
         u_tot = u1 + u2
@@ -150,6 +134,7 @@ def bmesh_check_thick_object(obj, thickness):
 
     # Triangulate
     bm = bmesh_copy_from_object(obj, transform=True, triangulate=False)
+
     # map original faces to their index.
     face_index_map_org = {f: i for i, f in enumerate(bm.faces)}
     ret = bmesh.ops.triangulate(bm, faces=bm.faces)
@@ -162,26 +147,12 @@ def bmesh_check_thick_object(obj, thickness):
     # Create a real mesh (lame!)
     context = bpy.context
     layer = context.view_layer
-    layer_collection = context.layer_collection or layer.active_layer_collection
-    scene_collection = layer_collection.collection
+    scene_collection = context.layer_collection.collection
 
     me_tmp = bpy.data.meshes.new(name="~temp~")
     bm.to_mesh(me_tmp)
-    # bm.free()  # delay free
     obj_tmp = bpy.data.objects.new(name=me_tmp.name, object_data=me_tmp)
-    # base = scene.objects.link(obj_tmp)
     scene_collection.objects.link(obj_tmp)
-
-    # Add new object to local view layer
-    # XXX28
-    '''
-    v3d = None
-    if context.space_data and context.space_data.type == 'VIEW_3D':
-        v3d = context.space_data
-
-    if v3d and v3d.local_view:
-        base.layers_from_view(context.space_data)
-    '''
 
     layer.update()
     ray_cast = obj_tmp.ray_cast
@@ -189,7 +160,6 @@ def bmesh_check_thick_object(obj, thickness):
     EPS_BIAS = 0.0001
 
     faces_error = set()
-
     bm_faces_new = bm.faces[:]
 
     for f in bm_faces_new:
@@ -202,7 +172,7 @@ def bmesh_check_thick_object(obj, thickness):
             p_b = p - no_end
             p_dir = p_b - p_a
 
-            ok, co, no, index = ray_cast(p_a, p_dir, distance=p_dir.length)
+            ok, _co, no, index = ray_cast(p_a, p_dir, distance=p_dir.length)
 
             if ok:
                 # Add the face we hit
@@ -212,7 +182,6 @@ def bmesh_check_thick_object(obj, thickness):
                     f_org_index = face_index_map_org[f_org]
                     faces_error.add(f_org_index)
 
-    # finished with bm
     bm.free()
 
     scene_collection.objects.unlink(obj_tmp)
@@ -224,6 +193,27 @@ def bmesh_check_thick_object(obj, thickness):
     return array.array('i', faces_error)
 
 
+def face_is_distorted(ele, angle_distort):
+    no = ele.normal
+    angle_fn = no.angle
+
+    for loop in ele.loops:
+        loopno = loop.calc_normal()
+
+        if loopno.dot(no) < 0.0:
+            loopno.negate()
+
+        if angle_fn(loopno, 1000.0) > angle_distort:
+            return True
+
+    return False
+
+
+
+
+
+
+# DGM: TODO: decide to delete or keep - The following is from modified version by Agnieszka Pas
 def object_merge(context, objects):
     """
     Caller must remove.
@@ -293,11 +283,124 @@ def object_merge(context, objects):
     # return new object
     return obj_base
 
-def face_is_distorted(ele, angle_distort):
-    no = ele.normal
-    angle_fn = no.angle
 
-    for loop in ele.loops:
-        if angle_fn(loop.calc_normal(), 1000.0) > angle_distort:
-            return True
-    return False
+
+
+
+#----------------------------------------------------------
+# File make_solid_helpers.py
+# Helper functions, to be used by MakeSolid class .
+#----------------------------------------------------------
+
+import bpy
+import bmesh
+
+
+def prepare_meshes():
+    bpy.ops.object.make_single_user(object=True, obdata=True)
+    bpy.ops.object.convert()
+    bpy.ops.object.join()
+
+    bpy.ops.object.mode_set(mode='EDIT')
+
+    # selection dance for proper results
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.context.tool_settings.mesh_select_mode = (True, True, True)
+
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.mesh.separate(type='LOOSE')
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+
+def prepare_mesh(obj, select_action):
+    scene = bpy.context.scene
+    layer = bpy.context.view_layer
+
+    active_object = layer.objects.active
+    layer.objects.active = obj
+    bpy.ops.object.mode_set(mode='EDIT')
+
+    # reveal hidden vertices in mesh
+    bpy.ops.mesh.reveal()
+
+    # mesh cleanup
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.separate(type='LOOSE')
+    bpy.ops.mesh.delete_loose()
+
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.remove_doubles(threshold=0.0001)
+
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.fill_holes(sides=0)
+
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.quads_convert_to_tris()
+
+    # back to previous settings
+    bpy.ops.mesh.select_all(action=select_action)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    layer.objects.active = active_object
+
+
+def cleanup_mesh(obj):
+    mesh = obj.data
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0001)
+    bm.to_mesh(mesh)
+    bm.free()
+
+
+def add_modifier(active, selected):
+    bool_modifier = active.modifiers.new(name='Boolean', type='BOOLEAN')
+    bool_modifier.object = selected
+    bool_modifier.show_viewport = False
+    bool_modifier.show_render = False
+    bool_modifier.operation = 'UNION'
+    try:
+        bool_modifier.solver = 'CARVE'
+    except:
+        pass
+
+    bpy.ops.object.modifier_apply(modifier='Boolean')
+
+    view_layer = bpy.context.view_layer
+    print ("layer_collection.name = " + bpy.context.layer_collection.name)
+    print ("view_layer.active_layer_collection.name = " + view_layer.active_layer_collection.name)
+    layer_collection = bpy.context.layer_collection or view_layer.active_layer_collection
+    collection = layer_collection.collection
+    collection.objects.unlink(selected)
+
+    bpy.data.objects.remove(selected)
+
+
+def make_solid_batch():
+    active = bpy.context.active_object
+    selected = bpy.context.selected_objects
+    selected.remove(active)
+
+    prepare_mesh(active, 'DESELECT')
+
+    for sel in selected:
+        prepare_mesh(sel, 'SELECT')
+        add_modifier(active, sel)
+        cleanup_mesh(active)
+
+
+def is_manifold(self):
+    mesh = bpy.context.active_object.data
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+
+    for edge in bm.edges:
+        if not edge.is_manifold:
+            bm.free()
+            self.report({'ERROR'}, "Boolean operation result is non-manifold")
+            return False
+
+    bm.free()
+    return True
+
+
