@@ -56,11 +56,13 @@ MeasureIt
 
 
 ### More info:
-Images below display original '3D Print Toolbox' (image on the left) and current modified version (image on the right):
+Images below display the modified '3D Print Toolbox' (image on the left), the official version it was based on (middle), and the Apr 2021 official Blender version (image on the right):
 
 <p align="middle">
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="200" height="600" />
   <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="200" height="600" />
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="200" height="600" />
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original_2021.png" title="current version" width="200" height="600" />
+
 </p>
 
 NOTE:
