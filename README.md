@@ -1,5 +1,16 @@
 # 3d-print-toolbox-modified
-Blender addon with utilities for 3d printing. It's based on '3D Print Toolbox' by Campbell Barton. In this modified version it's possible to have more influence on the clean up settings and it gives more flexibility.
+Blender addon with utilities for 3d printing. It's based on a outdated version of the '3D Print Toolbox' by Campbell Barton. In this modified version it's possible to have more influence on the clean up settings and it gives more flexibility.
+
+The plan is for unique features in this version to be progressively added back into the original Blender Addons print3d (
+https://github.com/blender/blender-addons/tree/master/object_print3d_utils via my fork
+https://github.com/dgm3333/blender-addons/tree/master/object_print3d_utils
+
+However because some documents (such as this file and the .blend printer startup file) are likely to be useful then this repo may remain longer term...
+
+
+
+
+
 
 ### Blender version:
 Any new mods going forward will be using Blender 2.92.
@@ -8,12 +19,20 @@ If you need version for Blender 2.79 or older, check the link: [3d-print-toolbox
 
 
 ### Other useful informmation
+The ultimate goal of this project is to have the tool automatically fix models so they can be printed with appropriate supports and modifications.
+In addition I would like to show in the mesh where the most likely failure points are - for SLA/DLP or FDM printers (which have quite different stresses during printing)
+
+My torture test is currently the models in StressAndSupportsVisualisation.blend which have a rough progression of difficulty
+Finishing with a model which is not only posable, but also has small details not even attached to the main model (and which will need to be in order for it to be printed (I don't think the last is likely to be achievable, but I'll be happy if I manage 50%)
+
+
+If you are looking for more useful information on modelling 3d printed parts in blender the following are good resources or addins:
+
 A webseries on precision Modeling & Blender 
 https://www.youtube.com/playlist?list=PL6Fiih6ItYsXzUbBNz7-IvV7UJYHZzCdF
 
 Notes on 3d print toolbox in blender
--	Only visible in edit mode
--	Shows in the 3d window RHS edge menu (called 3D-print). If it’s not showing try clicking the little triangle in the top RH corner of the viewport
+-	Shows in the 3d window RHS edge menu (called 3D-print - this one is called 3d printing to distinguish it). If it’s not showing try clicking the little triangle in the top RH corner of the viewport
 
 Other useful Blender Plugins
 Booltool
