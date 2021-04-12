@@ -487,6 +487,12 @@ class Plane3D:
         self.N2 = Point(A/d, B/d, C/d)
         self.d2 = round(self.N2.x*p1.x + self.N2.y*p1.y + self.N2.z*p1.z, 6)
         
+    def plane_2(self, p1b, p2b, p3b, theta1b = 0):
+        Nb, Ab, Bb, Cb, Db = self.plane_def(p1b, p2b, p3b)
+        db = round(sqrt(Ab*Ab + Bb*Bb + Cb*Cb), 6) 
+        self.N2 = Point(Ab/db, Bb/db, Cb/db)
+        self.d2 = round(self.N2.x*p1b.x + self.N2.y*p1b.y + self.N2.z*p1b.z, 6)
+                    
     # Calculate points to define plane #3 and calculate N3 and d3
     def plane_3(self):
         p1 = self.F
@@ -497,6 +503,12 @@ class Plane3D:
         self.N3 = Point(A/d, B/d, C/d)
         self.d3 = round(self.N3.x*p1.x + self.N3.y*p1.y + self.N3.z*p1.z, 6)
 
+    def plane_3(self, p1c, p2c, p3c, theta1c = 0):
+        Nc, Ac, Bc, Cc, Dc = self.plane_def(p1c, p2c, p3c)
+        dc = round(sqrt(Ac*Ac + Bc*Bc + Cc*Cc), 6) 
+        self.N3 = Point(Ac/dc, Bc/dc, Cc/dc)
+        self.d3 = round(self.N2.x*p1c.x + self.N2.y*p1c.y + self.N2.z*p1c.z, 6)
+        
     def three_pt_circle (self):     
         """
         /// The intersection of three planes is either a point, a line, or there is no intersection.
@@ -693,165 +705,201 @@ def support_interface(worldCoords, face, maxAngle, supportLoc):
 
     # will create with faces feeding under the centroid
     # This isn't the ideal point as angle from some vertices will be much shallower than required
-    x = face[0][0]
-    y = face[0][1]
-    z = face[0][2]
+    centroid = Point(face[0][0], face[0][1], face[0][2])
 
     # two random points on the z-axis (to get distance from each vertex to z-axis)
-    pZ1 = Point(0,0,0)
-    pZ2 = Point(0,0,10)   
+    pZ1 = Point(0,0,-1000)
+    pZ2 = Point(0,0,1000)   
 
+    print("")
+    print("Starting New Face Calculation")
+    if len(face[1]) != 3:
+        print("ERROR: this function will not work unless faces have exactly 3 edges")
+        print("Function will ignore this face until script is updated to handle this")
+        return
+
+    print("Using vertices:-")
     # convert the vertices to Points for looping
     vertices = []
     for vert in face[1]:
-        vertices.append(Point (vert.co[0], vert.co[1], vert.co[2]))
+        # Converting to world coordinates isn't required, but makes it easier to bug check
+        #newV = Point (vert.co[0]+wX, vert.co[1]+wY, vert.co[2]+wZ)
+        newV = Point (vert.co[0], vert.co[1], vert.co[2])
+        vertices.append(newV)
+        print(newV.x,newV.y,newV.z)
+        if (newV.x == 0 and newV.y == 0):
+            print("ERROR: this function can not currently identify the plane if an edge hits the z-axis (eg if a vertex is on zero)")
+            print("Function will ignore this face until script is updated to support this")
+            return
 
-    # now loop through each edge and identify the z-intercept in order to generate the 3 points to define the plane    
-    maxV = len(vertices) - 1
+
+    # now loop through each edge and identify the z-intercept in order to generate the 3 points to define the plane
+    # add the plane generated to the list of planes
+    planes = []
+    maxV = len(vertices)
     for v in range(maxV):
         p1 = vertices[v]
-        if v < maxV:
+        if v < maxV-1:
             p2 = vertices[v+1]
         else:
             p2 = vertices[0]
             
         # identify the intersection of the lines
+        #The dot product of the line defined by the two points with the z-axis allow us to calculate that
+        # Blender can do this step
+        # mathutils.geometry.intersect_line_line(v1, v2, v3, v4)
         lli = LineLineIntersect3D(p1,p2,pZ1,pZ2)
-        print("Points:",p1,p2,p3,p4)
+
+
+        if (lli.uv.x == 0.0 and lli.uv.x == 0.0 and lli.uv.x == 0.0):
+            print("ERROR: unit vector has length zero. This means all three points are in a line.")
+            print("Thus the x-axis intercept cannot be used to provide the 3rd point of the plane")
+            print("Using (1,1,0)->(1,1,1) line instead)")
+            lli = LineLineIntersect3D(p1,p2,Point(1,1,0),Point(1,1,1))
+            
+        print("Calculating plane from p1p2 edge with coordinates of:")
+        print(p1)
+        print(p2)
         print("UV (unit vector):", lli.uv)
+                    
         # the point on p1p2 will be exactly maxAngle from the point the plane intersects the z-axis
         print("Nearest point on p1p2 to z-axis:",lli.Pmem1)
         # the hypotenuse of a horizontal xy triangle becomes the adjacent side for the triangle down to the intercept
         # thus the opposite side (the difference in z-axis height from the current point is Opp = Adj*tan(maxAngle)
-        xyHyp = sqrt(lli.Pmem1.x*lli.Pmem1.x + lli.Pmem1.y*lli.Pmem1.y)            
+        xyHyp = sqrt(lli.Pmem1.x*lli.Pmem1.x + lli.Pmem1.y*lli.Pmem1.y) 
+               
         print("xy hypotenuse = xyz adjacent side:",xyHyp)
         opp = xyHyp * math.tan(maxAngle)
+        if opp==0.0:
+            print("ERROR: this function will not work for horizontal planes")
+            print("Function will ignore this face until script is updated to handle this")
+            return            
+        print("z intercept should be +/-",opp)
+        # now we have two potential intercepts (one above and one below the level of the intersection)
+        p3a = Point(0,0,lli.Pmem1.z+opp)
+        p3b = Point(0,0,lli.Pmem1.z-opp)
         
-        # now use the face centron to identify whether the intercept ia above or below the point on p1p2
+        print("zIntercept candidates are:-")     
+        print(p3a)
+        print(p3b)
+   
         
         
-        
-        zIntercept = lli.Pmem1.z - xyHyp
-        print("plane intersection with z-axis: (0, 0, ", zIntercept,")")            
-        
-    '''
-    p1 = Point(45,10,12)
-    p2 = Point(-34,10,19)
-    p3 = Point(0,0,0)
-    p4 = Point(0,0,10)        
-    lli = LineLineIntersect3D(p1,p2,p3,p4)
-    print("start")
-    print("Points:",p1,p2,p3,p4)
-    print("UV:", lli.uv)
-    print("Nearest point on p1p2 to p3p4:",lli.Pmem1)
-    print("Nearest point on p3p4 to p1p2:",lli.Pmem2)
+        # Now there are four potential normals for the plane. 
+        # We need to test which of the two points produces a plane in the coorrect orientation
+        # Selecting the normal which is on the same side as one of the other face points and which has uv.z >0 (or it's negative) 
+        #   will identify the correct one. 
+        # Use the face centron to identify whether the normal is on the same or opposide side of the plane as the face
+        #   and whether the normal points up or down (it should point up towards the face or down away)
+        print ("Testing plane candidate generated using point p3a")
+        planeC = Plane3D(p1, p2, p3a)
+        correctPlane = False
+        lieCheckA = planeC.lie_check(centroid)
 
-    xyHyp= sqrt(lli.Pmem1.x*lli.Pmem1.x + lli.Pmem1.y*lli.Pmem1.y)
-    print("xy hypot:",xyHyp)
-    print("plane intersection with z-axis: (0, 0, ", lli.Pmem1.z - xyHyp,")")
-    '''
-    #print("vertices",vertices)
-
-
-
-
-
-
-    # find a point which is 45 degress below and between each pair of vertices looping around the face
-    # then average this to get an approximate central point
-    curV = 0
-    nextApproxVert = []
-    closeEnough = False
-    loopCnt = 1
-    maxAngle = -3.14159/4   # 45 degrees
-    PI_2 = -3.14159/2       # 90 degrees
-    while not closeEnough:
-    
-        # load the next vertex pair in the loop around the edge of the face
-        x0 = vertices[curV][0]
-        y0 = vertices[curV][1]        
-        z0 = vertices[curV][2]        
-        
-        if curV < vertexCnt -1:
-            x1 = vertices[curV+1][0]        
-            y1 = vertices[curV+1][1]        
-            z1 = vertices[curV+1][2]        
+        if lieCheckA == 0.0:
+            print("Warning: The face centroid lies on current plane.")
+            print("  The face  may be at exactly maxAngle (but if this is the case it shouldn't have been selected for support)")
+        elif lieCheckA < 0.0:
+            print ("The centroid lies on OPPOSITE side of current plane as normal N.")
+            if planeC.N.z < 0:
+                print ("The normal N.z points DOWN so this is the correct plane")
+                correctPlane = True
+                planeC.N = -planeC.N
         else:
-            x1 = vertices[0][0]        
-            y1 = vertices[0][1]        
-            z1 = vertices[0][2]        
+            print ("The centroid lies on SAME side of current plane as normal N.")
+            if planeC.N.z > 0:
+                print ("The normal N.z points UP so this is the correct plane")
+                correctPlane = True
+                planeC.N = -planeC.N
+                
+        if not correctPlane:        
+            print ("p3a plane didn't meet selection criteria")
+            print ("Testing plane candidate generated using  point p3b")
+            planeC = Plane3D(p1, p2, p3b)
+            correctPlane = False
+            lieCheckA = planeC.lie_check(centroid)
+            if lieCheckA == 0.0:
+                print ("ERROR: The face centroid lies on current plane - THIS SHOULDN'T HAPPEN IF THE PLANE IS CORRECT")
+            elif lieCheckA < 0.0:
+                print ("The centroid lies on OPPOSITE side of current plane as normal N.")
+                if planeC.N.z < 0:
+                    print ("The normal N.z points DOWN so this is the correct plane")
+                    correctPlane = True
+                    planeC.N = -planeC.N
+            else:
+                print ("The centroid lies on SAME side of current plane as normal N.")
+                if planeC.N.z > 0:
+                    print ("The normal N.z points UP so this is the correct plane")
+                    correctPlane = True
+                    planeC.N = -planeC.N
+                        
+        if not correctPlane:
+            print ("ERROR: Neither plane matches - THIS SHOULDN'T HAPPEN IF THE PLANE IS CORRECT")
+            return
+        else: 
+            planes.append(planeC)
+
+        
+    # Now we should have three planes we just need to establish the intersect point
+    if len(planes) == 3:
+        print("3 PLANES IDENTIFIED")
+    else:
+        print("NEVER EVENT OCCURRED:")
+        print("  Number of planes != 3")
+        print("  Function will ignore this face until script is updated to handle this")
+        return
+
+    # The intersection point of the three planes "M" is given by:
+    # M = (d1*(N1 cross N2) + d2*(N2 cross N0) + d3*(N0 cross N1)) / (N0 dot (N1 cross N2))
+    # 'cross' indicates the cross product and 'dot' indicates the dot product
+    # blender could do this step with:
+    # blender could do this with
+    # mathutils.geometry.intersect_plane_plane(plane_a_co, plane_a_no, plane_b_co, plane_b_no)
+    print("Normals and D coefficients for the three planes are:-")   
+    N0 = planes[0].N
+    N1 = planes[1].N
+    N2 = planes[2].N
+    D0 = planes[0].D
+    D1 = planes[1].D
+    D2 = planes[2].D
+    #k0 = round(N0.dot(planes[0].p1), 6)
+    #k1 = round(N1.dot(planes[1].p1), 6)
+    #k2 = round(N2.dot(planes[2].p1), 6)
+    print(N0.x, N0.y, N0.z, "   ", D0)#, "   ", k0)
+    print(N1.x, N1.y, N1.z, "   ", D1)#, "   ", k1)
+    print(N2.x, N2.y, N2.z, "   ", D2)#, "   ", k2)
+
+    N12 = N1.cross(N2)
+    N20 = N2.cross(N0)
+    N01 = N0.cross(N1)
+    N0dN12 = round(N0.dot(N12), 6)
+
+
+    print("Original Face Vertices and Centroid are:-")
+    for vert in vertices:
+        print(vert.x, vert.y, vert.z)
+    print(face[0].x, face[0].y, face[0].z, "(=centroid)")
+
+
+    print("Intersection Point Is:-")    
+    # TODO: figure out why Point overloads aren't working
+    # M = (D0*N12 + D1*N20 + D2*N01) / N0dN12
+    # point overloads not working, so calculate individually first
+    D0N12 = Point(N12.x*D0, N12.y*D0, N12.z*D0)    
+    D1N20 = Point(N20.x*D1, N20.y*D1, N20.z*D1)    
+    D2N01 = Point(N01.x*D2, N01.y*D2, N01.z*D2)    
+
+    CPs = D0N12 + D1N20 + D2N01
+
             
-        # get the xyz axial distances of the triangle
-        dx = x0 - x1
-        dy = y0 - y1
-        dz = z0 - z1
-    
-        #print("dxyz=",dx,dy,dz)
-    
-    
-        # get the 2D distance on the z-plane between vertices
-        xyLen = math.sqrt(dx*dx + dy*dy)
-        #print("xyLen",xyLen)
-        # get the 3D distance between vertices
-        h0 = math.sqrt(dx*dx + dy*dy + dz*dz)
-        #print("h0",h0)
-        # get the angle of the hypotenuse relative to horizontal
-        a0 = abs(math.asin(dz/h0))
-        #print("a0",a0)
-        #get the angle of the additional triangle needed to keep angle under max value
-        a1 = PI_2 - a0 - maxAngle
-        #print("a1",a1)
-        #get the length of the opp and adj sides of the "safe" triangle
-        opp = math.sin(a1) * h0   # the z drop from the lower vertex to the "safe" vertex
-        adj = math.cos(a1) * h0
-        #print("opAd",opp, adj)
-        #now get the other side lengths for the triangle from the higher vertex to the safe vertex
-        # at 90deg to horizontal
-        zHigh = math.asin(PI_2 - maxAngle) * adj   # adj for the previous triangle is hyp of the new one
-        zAdj = math.acos(PI_2 - maxAngle) * adj
-        #print("zHigh/zAdj",zHigh,zAdj)
-        
-        xyProp = zAdj / xyLen
-        #print("xyProp",xyProp)
-        
-        dx1 = dx * xyProp
-        dy1 = dy * xyProp
-        #print("dxy1",dx1,dy1)
-        
-        nextApproxVert.append((x0 - dx1, y0 - dy1, z0 + zHigh))
-        
-        curV +=1
-        if curV >= vertexCnt:
-            curV = 0
-            loopCnt -= 1
-            #print(nextApproxVert)
-            vertices = nextApproxVert           
-            nextApproxVert = []
-            if loopCnt <= 0: 
-                closeEnough = True
-
-    # after it meets criteria for closeEnough then take the average of vertices           
-    (x,y,z)=(0,0,0)
-    for v in vertices:           
-        x += v[0]
-        y += v[1]
-        z += v[2]
-    x=x/vertexCnt
-    y=y/vertexCnt
-    z=z/vertexCnt
-     
-#    faceMinZ = 999999
-#    for vert in face[1]:
-#        if faceMinZ > vert.co[2]:
-#            faceMinZ = vert.co[2]
-#            x = vert.co[0] + wX
-#            y = vert.co[1] + wY
-#            z = vert.co[2] + wZ
+    M = Point(CPs.x / N0dN12, CPs.y / N0dN12, CPs.z / N0dN12) 
+    print(M.x, M.y, M.z)
 
 
-    x+= wX
-    y+= wY
-    z+= wZ
+
+    x = M.x + wX
+    y = M.y + wY
+    z = M.z + wZ
 
     # update the mutables so they're accessible outside the function
 #    distanceBelow = 5
@@ -895,7 +943,7 @@ def createSupports():
     supportType = "SUPPORT_WALL"
     supportType = "SUPPORT_AUTO"
 
-    supportColumnDiameter = 0.01
+    supportColumnDiameter = 0.1
     supportColumnFaces = 3
 
 
@@ -977,4 +1025,7 @@ def createSupports():
     initialSelection[0].select
     #bpy.ops.object.mode_set(mode = initialMode)
 
+
+print("")
+print("*****************   STARTING NEW RUN    *********************")
 createSupports()
