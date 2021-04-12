@@ -61,7 +61,11 @@ class VIEW3D_PT_print3d_analyze(View3DPrintPanel, Panel):
             for i, (text, data) in enumerate(info):
                 if is_edit and data and data[1]:
                     bm_type, _bm_array = data
-                    col.operator("mesh.print3d_select_report", text=text, icon=self._type_to_icon[bm_type],).index = i
+                    row = col.row(align=True)
+                    row.operator("mesh.print3d_select_report", text=text, icon=self._type_to_icon[bm_type],).index = i
+                    row.operator("mesh.print3d_trigger_clean", text="", icon="SHADERFX",).index = i
+                    #col.operator("mesh.print3d_clean_non_manifold", text="", icon="SHADERFX",)
+                    #TODO: insert Blender icon SHADERFX for the cleanup
                 else:
                     col.label(text=text)
 
@@ -129,10 +133,13 @@ class VIEW3D_PT_print3d_cleanup(View3DPrintPanel, Panel):
         row = layout.row(align=True)
         row.operator("mesh.print3d_clean_distorted", text="Distorted")
         row.prop(print_3d, "angle_distort", text="")
+        row = layout.row(align=True)
         layout.operator("mesh.print3d_clean_non_manifold", text="Make Manifold")
+        row = layout.row(align=True)
 
         #Agnieszka Pas Cleaners
-        layout.operator("mesh.print3d_clean_degenerates", text="Dissolve Degenerates")
+        layout.operator("mesh.print3d_clean_degenerate", text="Dissolve Degenerate")
+        row = layout.row(align=True)
         layout.operator("mesh.print3d_clean_doubles", text="Remove Doubles")
         layout.operator("mesh.print3d_clean_loose", text="Delete Loose")
         layout.operator("mesh.print3d_clean_non_planars", text="Split Non Planar Faces")

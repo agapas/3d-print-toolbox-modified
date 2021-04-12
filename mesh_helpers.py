@@ -286,7 +286,7 @@ def object_merge(context, objects):
 
 
 
-
+'''
 #----------------------------------------------------------
 # File make_solid_helpers.py
 # Helper functions, to be used by MakeSolid class .
@@ -402,5 +402,8 @@ def is_manifold(self):
 
     bm.free()
     return True
+
+'''
+
 
 

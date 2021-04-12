@@ -535,6 +535,475 @@ class MESH_OT_print3d_clean_thin(Operator):
         return {'FINISHED'}
 
 
+class MESH_OT_print3d_clean_degenerate(Operator):
+    bl_idname = "mesh.print3d_clean_degenerate"
+    bl_label = "Degenerate Dissolve"
+    bl_description = "Dissolve zero area faces and zero length edges"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    threshold: FloatProperty(
+        name="Merge Distance",
+        description="Minimum distance between elements to merge",
+        default=0.0001,
+        step=1
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.dissolve_degenerate(self.threshold)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def dissolve_degenerate(threshold):
+        """dissolve zero area faces and zero length edges"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.dissolve_degenerate(threshold=threshold)
+
+
+class MESH_OT_print3d_clean_doubles(Operator):
+    bl_idname = "mesh.print3d_clean_doubles"
+    bl_label = "Remove Doubles"
+    bl_description = "Remove duplicate vertices"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    threshold: FloatProperty(
+        name="Merge Distance",
+        description="Minimum distance between elements to merge",
+        default=0.0001,
+        step=1
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.remove_doubles(self.threshold)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def remove_doubles(threshold):
+        """select all vertices and remove duplicated ones"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.remove_doubles(threshold=threshold)
+
+class MESH_OT_print3d_clean_loose(Operator):
+    bl_idname = "mesh.print3d_clean_loose"
+    bl_label = "3D-Print Clean Loose"
+    bl_description = "Clean Loose TESTING"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # TODO
+
+        return {'FINISHED'}
+
+
+
+'''
+
+class MESH_OT_print3d_clean_loose(Operator):
+    bl_idname = "mesh.print3d_clean_loose"
+    bl_label = "Delete Loose"
+    bl_description = "Delete loose vertices, edges or faces"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    use_verts: BoolProperty(
+        name="Vertices",
+        description="Remove loose vertices",
+        default=True
+    )
+
+    use_edges: BoolProperty(
+        name="Edges",
+        description="Remove loose edges",
+        default=True
+    )
+
+    use_faces: BoolProperty(
+        name="Faces",
+        description="Remove loose faces",
+        default=True
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.delete_loose(self.use_verts, self.use_edges, self.use_faces)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def delete_loose(use_verts, use_edges, use_faces):
+        #"""delete loose vertices, edges or faces"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.delete_loose(use_verts=use_verts, use_edges=use_edges, use_faces=use_faces)
+
+'''
+
+class MESH_OT_print3d_clean_non_planars(Operator):
+    bl_idname = "mesh.print3d_clean_non_planars"
+    bl_label = "Split Non Planar Faces"
+    bl_description = "Split non-planar faces that exceed the angle threshold"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # TODO
+
+        return {'FINISHED'}
+
+'''        
+class MESH_OT_print3d_clean_non_planars(Operator):
+    bl_idname = "mesh.print3d_clean_non_planars"
+    bl_label = "Split Non Planar Faces"
+    bl_description = "Split non-planar faces that exceed the angle threshold"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    angle_threshold: FloatProperty(
+        name="Max Angle",
+        description="Angle limit",
+        default=0.174533,
+        subtype="ANGLE",
+        unit="ROTATION",
+        step=10
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.clean_non_planars(self.angle_threshold)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def clean_non_planars(angle_limit):
+        #"""split non-planar faces that exceed the angle threshold"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.vert_connect_nonplanar(angle_limit=angle_limit)
+        # bpy.ops.ui.reports_to_textblock()
+'''
+
+class MESH_OT_print3d_clean_concaves(Operator):
+    bl_idname = "mesh.print3d_clean_concaves"
+    bl_label = "Split Concave Faces"
+    bl_description = "Make all faces convex"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # TODO
+
+        return {'FINISHED'}
+
+'''        
+class MESH_OT_print3d_clean_concaves(Operator):
+    bl_idname = "mesh.print3d_clean_concaves"
+    bl_label = "Split Concave Faces"
+    bl_description = "Make all faces convex"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.clean_concaves()
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def clean_concaves():
+        #"""make all faces convex"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.vert_connect_concave()
+
+'''
+
+class MESH_OT_print3d_clean_triangulates(Operator):
+    bl_idname = "mesh.print3d_clean_triangulates"
+    bl_label = "Triangulate Faces"
+    bl_description = "Triangulate selected faces"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # TODO
+
+        return {'FINISHED'}
+
+'''    
+class MESH_OT_print3d_clean_triangulates(Operator):
+    bl_idname = "mesh.print3d_clean_triangulates"
+    bl_label = "Triangulate Faces"
+    bl_description = "Triangulate selected faces"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        bpy.ops.mesh.quads_convert_to_tris()
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+'''
+
+class MESH_OT_print3d_clean_holes(Operator):
+    bl_idname = "mesh.print3d_clean_holes"
+    bl_label = "Fill Holes"
+    bl_description = "Fill in holes (boundary edge loops)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # TODO
+
+        return {'FINISHED'}
+
+'''        
+class MESH_OT_print3d_clean_holes(Operator):
+    bl_idname = "mesh.print3d_clean_holes"
+    bl_label = "Fill Holes"
+    bl_description = "Fill in holes (boundary edge loops)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    sides: IntProperty(
+        name="Sides",
+        description="Number of sides in hole required to fill (zero fills all holes)",
+        default=4,
+        step=1
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.fill_holes(self.sides)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def fill_holes(sides):
+        #"""fill in holes (boundary edge loops)"""
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.fill_holes(sides=sides)
+
+'''
+
+class MESH_OT_print3d_clean_limited(Operator):
+    bl_idname = "mesh.print3d_clean_limited"
+    bl_label = "Limited Dissolve"
+    bl_description = "Dissolve selected edges and verts, limited by the angle of surrounding geometry"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # TODO
+
+        return {'FINISHED'}
+
+'''        
+
+class MESH_OT_print3d_clean_limited(Operator):
+    bl_idname = "mesh.print3d_clean_limited"
+    bl_label = "Limited Dissolve"
+    bl_description = "Dissolve selected edges and verts, limited by the angle of surrounding geometry"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    angle_threshold: FloatProperty(
+        name="Max Angle",
+        description="Angle limit",
+        default=0.0872665,
+        subtype="ANGLE",
+        unit="ROTATION",
+        step=10
+    )
+
+    use_boundaries: BoolProperty(
+        name="All Boundaries",
+        description="Dissolve all vertices in between face boundaries",
+        default=False
+    )
+
+    def execute(self, context):
+        self.context = context
+        mode_orig = context.mode
+
+        setup_environment()
+
+        bm_key_orig = elem_count(context)
+
+        self.limited_dissolve(self.angle_threshold, self.use_boundaries)
+
+        bm_key = elem_count(context)
+
+        if mode_orig != 'EDIT_MESH':
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        self.report(
+            {'INFO'},
+            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
+            (bm_key[0] - bm_key_orig[0],
+             bm_key[1] - bm_key_orig[1],
+             bm_key[2] - bm_key_orig[2]
+            ))
+
+        return {'FINISHED'}
+
+    @staticmethod
+    def limited_dissolve(angle, use_boundaries):
+        #"""dissolve selected edges and verts, limited by the angle of surrounding geometry"""
+        bpy.ops.mesh.dissolve_limited(angle_limit=angle, use_dissolve_boundaries=use_boundaries, delimit={'NORMAL'})
+
+
+'''
+
+'''
+# ------------------------------------
+# Make Solid from selected objects
+
+class MESH_OT_print3d_merge_selected_into_single_solid(Operator):
+    """Combine selected objects into one"""
+    bl_idname = "object.make_solid"
+    bl_label = "Make Solid"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    mode: 'UNION'
+
+    def execute(self, context):
+        active = context.view_layer.objects.active
+        selected = context.selected_objects
+
+        if active is None or len(selected) < 2:
+            self.report({'WARNING'}, "Select at least 2 objects")
+            return {'CANCELLED'}
+        else:
+            #mesh_helpers.prepare_meshes()
+            #mesh_helpers.make_solid_batch()
+            #mesh_helpers.is_manifold(self)
+
+        return {'FINISHED'}        
+
+'''
 # -------------
 # Select Report
 # ... helper function for info UI
@@ -580,6 +1049,49 @@ class MESH_OT_print3d_select_report(Operator):
             self.report({'WARNING'}, "Report is out of date, re-run check")
 
         return {'FINISHED'}
+
+class MESH_OT_print3d_trigger_clean(Operator):
+    bl_idname = "mesh.print3d_trigger_clean"
+    bl_label = "3D-Print Trigger Clean"
+    bl_description = "Fix the issues associated with this report"
+    bl_options = {'INTERNAL'}
+
+    index: IntProperty()
+
+    _type_to_mode = {
+        bmesh.types.BMVert: 'VERT',
+        bmesh.types.BMEdge: 'EDGE',
+        bmesh.types.BMFace: 'FACE',
+    }
+
+    _type_to_attr = {
+        bmesh.types.BMVert: "verts",
+        bmesh.types.BMEdge: "edges",
+        bmesh.types.BMFace: "faces",
+    }
+
+    def execute(self, context):
+        obj = context.edit_object
+        info = report.info()
+        _text, data = info[self.index]
+        bm_type, bm_array = data
+
+        bpy.ops.mesh.reveal()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_mode(type=self._type_to_mode[bm_type])
+
+        bm = bmesh.from_edit_mesh(obj.data)
+        elems = getattr(bm, MESH_OT_print3d_select_report._type_to_attr[bm_type])[:]
+
+        try:
+            for i in bm_array:
+                elems[i].select_set(True)
+        except:
+            # possible arrays are out of sync
+            self.report({'WARNING'}, "Report is out of date, re-run check")
+
+        return {'FINISHED'}
+
 
 
 # -----------
@@ -711,448 +1223,3 @@ class MESH_OT_print3d_export(Operator):
             return {'FINISHED'}
 
         return {'CANCELLED'}
-
-
-
-
-
-
-
-
-
-
-## DGM TODO: not sure if there's any benefit in having these - might removed
-
-
-class MESH_OT_print3d_Copy_Volume_To_Clipboard(Operator):
-    """Copy the volume value to clipboard"""
-    bl_idname = "mesh.print3d_copy_volume_to_clipboard"
-    bl_label = ""
-    bl_options = {'REGISTER', 'UNDO'}
-
-    volume: StringProperty(name="Copied to Clipboard (Volume):")
-
-    def execute(self, context):
-        volume = self.volume
-        if volume:
-            text_value = get_text_value(volume)
-            context.window_manager.clipboard = text_value
-            self.volume = text_value
-
-        return {'FINISHED'}
-
-
-class MESH_OT_print3d_Copy_Area_To_Clipboard(Operator):
-    """Copy the area value to clipboard"""
-    bl_idname = "mesh.print3d_copy_area_to_clipboard"
-    bl_label = ""
-    bl_options = {'REGISTER', 'UNDO'}
-
-    area: StringProperty(name="Copied to Clipboard (Area):")
-
-    def execute(self, context):
-        area = self.area
-        if area:
-            text_value = get_text_value(area)
-            context.window_manager.clipboard = text_value
-            self.area = text_value
-
-        return {'FINISHED'}
-
-
-
-
-
-    
-
-# ---------------
-# Mesh Clean Up
-
-class MESH_OT_print3d_clean_degenerates(Operator):
-    """Dissolve zero area faces and zero length edges"""
-    bl_idname = "mesh.print3d_clean_degenerates"
-    bl_label = "Degenerate Dissolve"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    threshold: FloatProperty(
-        name="Merge Distance",
-        description="Minimum distance between elements to merge",
-        default=0.0001,
-        step=1
-    )
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.dissolve_degenerate(self.threshold)
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def dissolve_degenerate(threshold):
-        """dissolve zero area faces and zero length edges"""
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.dissolve_degenerate(threshold=threshold)
-
-
-class MESH_OT_print3d_clean_doubles(Operator):
-    """Remove duplicate vertices"""
-    bl_idname = "mesh.print3d_clean_doubles"
-    bl_label = "Remove Doubles"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    threshold: FloatProperty(
-        name="Merge Distance",
-        description="Minimum distance between elements to merge",
-        default=0.0001,
-        step=1
-    )
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.remove_doubles(self.threshold)
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def remove_doubles(threshold):
-        """select all vertices and remove duplicated ones"""
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.remove_doubles(threshold=threshold)
-
-
-class MESH_OT_print3d_clean_loose(Operator):
-    """Delete loose vertices, edges or faces"""
-    bl_idname = "mesh.print3d_clean_loose"
-    bl_label = "Delete Loose"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    use_verts: BoolProperty(
-        name="Vertices",
-        description="Remove loose vertices",
-        default=True
-    )
-
-    use_edges: BoolProperty(
-        name="Edges",
-        description="Remove loose edges",
-        default=True
-    )
-
-    use_faces: BoolProperty(
-        name="Faces",
-        description="Remove loose faces",
-        default=True
-    )
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.delete_loose(self.use_verts, self.use_edges, self.use_faces)
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def delete_loose(use_verts, use_edges, use_faces):
-        """delete loose vertices, edges or faces"""
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.delete_loose(use_verts=use_verts, use_edges=use_edges, use_faces=use_faces)
-
-
-class MESH_OT_print3d_clean_non_planars(Operator):
-    """Split non-planar faces that exceed the angle threshold"""
-    bl_idname = "mesh.print3d_clean_non_planars"
-    bl_label = "Split Non Planar Faces"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    angle_threshold: FloatProperty(
-        name="Max Angle",
-        description="Angle limit",
-        default=0.174533,
-        subtype="ANGLE",
-        unit="ROTATION",
-        step=10
-    )
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.clean_non_planars(self.angle_threshold)
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def clean_non_planars(angle_limit):
-        """split non-planar faces that exceed the angle threshold"""
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.vert_connect_nonplanar(angle_limit=angle_limit)
-        # bpy.ops.ui.reports_to_textblock()
-
-
-class MESH_OT_print3d_clean_concaves(Operator):
-    """Make all faces convex"""
-    bl_idname = "mesh.print3d_clean_concaves"
-    bl_label = "Split Concave Faces"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.clean_concaves()
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def clean_concaves():
-        """make all faces convex"""
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.vert_connect_concave()
-
-
-class MESH_OT_print3d_clean_triangulates(Operator):
-    """Triangulate selected faces"""
-    bl_idname = "mesh.print3d_clean_triangulates"
-    bl_label = "Triangulate Faces"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        bpy.ops.mesh.quads_convert_to_tris()
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-
-class MESH_OT_print3d_clean_holes(Operator):
-    """Fill in holes (boundary edge loops)"""
-    bl_idname = "mesh.print3d_clean_holes"
-    bl_label = "Fill Holes"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    sides: IntProperty(
-        name="Sides",
-        description="Number of sides in hole required to fill (zero fills all holes)",
-        default=4,
-        step=1
-    )
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.fill_holes(self.sides)
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def fill_holes(sides):
-        """fill in holes (boundary edge loops)"""
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.fill_holes(sides=sides)
-
-
-class MESH_OT_print3d_clean_limited(Operator):
-    """Dissolve selected edges and verts, limited by the angle of surrounding geometry"""
-    bl_idname = "mesh.print3d_clean_limited"
-    bl_label = "Limited Dissolve"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    angle_threshold: FloatProperty(
-        name="Max Angle",
-        description="Angle limit",
-        default=0.0872665,
-        subtype="ANGLE",
-        unit="ROTATION",
-        step=10
-    )
-
-    use_boundaries: BoolProperty(
-        name="All Boundaries",
-        description="Dissolve all vertices in between face boundaries",
-        default=False
-    )
-
-    def execute(self, context):
-        self.context = context
-        mode_orig = context.mode
-
-        setup_environment()
-
-        bm_key_orig = elem_count(context)
-
-        self.limited_dissolve(self.angle_threshold, self.use_boundaries)
-
-        bm_key = elem_count(context)
-
-        if mode_orig != 'EDIT_MESH':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.report(
-            {'INFO'},
-            "Modified Verts:%+d, Edges:%+d, Faces:%+d" %
-            (bm_key[0] - bm_key_orig[0],
-             bm_key[1] - bm_key_orig[1],
-             bm_key[2] - bm_key_orig[2]
-            ))
-
-        return {'FINISHED'}
-
-    @staticmethod
-    def limited_dissolve(angle, use_boundaries):
-        """dissolve selected edges and verts, limited by the angle of surrounding geometry"""
-        bpy.ops.mesh.dissolve_limited(angle_limit=angle, use_dissolve_boundaries=use_boundaries, delimit={'NORMAL'})
-
-
-
-
-
-# ------------------------------------
-# Make Solid from selected objects
-
-class MESH_OT_print3d_merge_selected_into_single_solid(Operator):
-    """Combine selected objects into one"""
-    bl_idname = "object.make_solid"
-    bl_label = "Make Solid"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    mode: 'UNION'
-
-    def execute(self, context):
-        active = context.view_layer.objects.active
-        selected = context.selected_objects
-
-        if active is None or len(selected) < 2:
-            self.report({'WARNING'}, "Select at least 2 objects")
-            return {'CANCELLED'}
-        else:
-            #mesh_helpers.prepare_meshes()
-            #mesh_helpers.make_solid_batch()
-            #mesh_helpers.is_manifold(self)
-
-        return {'FINISHED'}        

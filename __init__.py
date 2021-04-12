@@ -30,7 +30,7 @@ bl_info = {
     "name": "3D Print Toolbox",
     "description": "Utilities for 3D printing",
     "author": "Campbell Barton, Agnieszka Pas, David Mckenzie",
-    "version": (2, 1, 2),
+    "version": (2, 1, 410),
     "blender": (2, 80, 0),
     "location": "3D View > Sidebar",
     "warning": "",
@@ -161,17 +161,20 @@ classes = (
     operators.MESH_OT_print3d_clean_thin,
     operators.MESH_OT_print3d_clean_non_manifold,
 
-    operators.MESH_OT_print3d_clean_degenerates,
+    operators.MESH_OT_print3d_clean_degenerate,
     operators.MESH_OT_print3d_clean_doubles,
+
+## not sure why, but these aren't registering properly...    
     operators.MESH_OT_print3d_clean_loose,
-    operators.MESH_OT_print3d_clean_non_planars,
-    operators.MESH_OT_print3d_clean_concaves,
-    operators.MESH_OT_print3d_clean_triangulates,
-    operators.MESH_OT_print3d_clean_holes,
-    operators.MESH_OT_print3d_clean_limited,
+#    operators.MESH_OT_print3d_clean_non_planars,
+#    operators.MESH_OT_print3d_clean_concaves,
+#    operators.MESH_OT_print3d_clean_triangulates,
+#    operators.MESH_OT_print3d_clean_holes,
+#    operators.MESH_OT_print3d_clean_limited,
 
 
     operators.MESH_OT_print3d_select_report,
+    operators.MESH_OT_print3d_trigger_clean,    
     operators.MESH_OT_print3d_scale_to_volume,
     operators.MESH_OT_print3d_scale_to_bounds,
 
