@@ -49,6 +49,18 @@ Add Mesh: Extra Objects
 Mesh: Looptools
 MeasureIt
 
+OpenSCAD importer for Blender: https://github.com/maqqr/blender-openscad-import  (this is newer than the "official" blender git)
+Extra Objects Addon: https://docs.blender.org/manual/en/2.92/addons/add_mesh/mesh_extra_objects.html
+(included in Blender installation and defines gears, pipes, etc)
+
+
+Other (potentially) relevant information
+Dicer - g-code slicer for blender (not updated since 2014 but has various slicing script fragments) https://github.com/BlenderCN-Org/Dicer
+
+Not Free (and not tried but look like might have potential):
+Parameterizer: https://b3d.interplanety.org/en/blender-add-on-parametrizer/
+
+
 
 
 A 3d printer workarea - this is for specific printer, but you can modify it to suit your own.
