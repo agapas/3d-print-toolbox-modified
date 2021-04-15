@@ -56,6 +56,7 @@ Extra Objects Addon: https://docs.blender.org/manual/en/2.92/addons/add_mesh/mes
 
 Other (potentially) relevant information
 Dicer - g-code slicer for blender (not updated since 2014 but has various slicing script fragments) https://github.com/BlenderCN-Org/Dicer
+FEM with Blender and FreeCAD - CalculiX: Complex Model: https://www.youtube.com/watch?v=t_x4x2ROXZw
 
 Not Free (and not tried but look like might have potential):
 Parameterizer: https://b3d.interplanety.org/en/blender-add-on-parametrizer/
