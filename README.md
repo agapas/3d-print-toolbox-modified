@@ -85,10 +85,9 @@ Models can potentially be viewed by layer (using the normal Blender ghost view)<
 Images below display the modified '3D Print Toolbox' (image on the left), the official version it was based on (middle), and the Apr 2021 official Blender version (image on the right):<p>
 <p>
 <p align="middle"><p>
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="200" height="600" /><p>
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="200" height="600" /><p>
-  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/print3dAddon_original_2021.png" title="current version" width="200" height="600" /><p>
-<p>
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="200" height="600" />
+  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="200" height="600" />
+  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/print3dAddon_original_2021.png" title="current version" width="200" height="600" />
 </p><p>
 <p>
 NOTE:<p>
