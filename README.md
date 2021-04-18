@@ -12,13 +12,13 @@ However because some documents (such as this file and the .blend printer startup
 <p>
 <p>
 <p>
-### Blender version:<p>
+### Blender version:
 Any new mods going forward will be using Blender 2.92.<p>
 The original (forked code) was tested on Blender 2.80 Release Candidate 3 (windows64).<p>
 If you need version for Blender 2.79 or older, check the link: [3d-print-toolbox-modified-blender2.79](https://github.com/agapas/3d-print-toolbox-modified-blender2.79)<p>
 <p>
 <p>
-### Other useful informmation<p>
+### Other useful information
 The ultimate goal of this project is to have the tool automatically fix models so they can be printed with appropriate supports and modifications.<p>
 In addition I would like to show in the mesh where the most likely failure points are - for SLA/DLP or FDM printers (which have quite different stresses during printing)<p>
 <p>
@@ -55,7 +55,7 @@ Extra Objects Addon: https://docs.blender.org/manual/en/2.92/addons/add_mesh/mes
 <p>
 <p>
 Other (potentially) relevant information<p>
-Dicer - g-code slicer for blender (not updated since 2014 but has various slicing script fragments) https://github.com/BlenderCN-Org/Dicer<p>
+Dicer - g-code slicer for blender (probably superseded by current code and not updated since 2014 but had some script fragments) https://github.com/BlenderCN-Org/Dicer<p>
 FEM with Blender and FreeCAD - CalculiX: Complex Model: https://www.youtube.com/watch?v=t_x4x2ROXZw<p>
 <p>
 Not Free (and not tried but look like might have potential):<p>
@@ -72,9 +72,12 @@ But if you primarily use Blender for 3D printing then, you can use your modified
   <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/PrinterWorkarea.png" title="current version" /><p>
 </p><p>
 Partially Coded portions include a redesigned interface, printer calibration section, Slicer, integration with MeshLab, and Resin Printer file export<p>
-  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Calibration%20Models.png" title="Calibration Models" /><p>
-  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Sliced%20Model%20-%20Non%20Manifold.png" title="Slicer - Non-Manifold View" /><p>
-  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Sliced%20Model%20-%20Layer%20View.png" title="Slicer - Layer View" /><p>
+Some of the calibration models it creates (these are designed to test various aspects of the print to inform the analyser<p>
+<img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Calibration%20Models.png" title="Calibration Models" /><p>
+One of the enhanced ways of identifying issues with non-manifold meshes<p>
+<img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Sliced%20Model%20-%20Non%20Manifold.png" title="Slicer - Non-Manifold View" /><p>
+Models can potentially be viewed by layer (using the normal Blender ghost view)<p>
+<img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Sliced%20Model%20-%20Layer%20View.png" title="Slicer - Layer View" /><p>
 <p>
 <p>
 <p>
