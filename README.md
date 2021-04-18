@@ -69,8 +69,13 @@ Since it's very simple, adding this to the scene will be scripted rather than re
 (Possibly as an application template https://docs.blender.org/manual/en/latest/advanced/app_templates.html)
 But if you primarily use Blender for 3D printing then, you can use your modified version to overwrite your startup via File/Defaults/Save Startup File
 <p align="left">
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/PrinterWorkarea.png" title="current version" width="200" height="600" />
+  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/PrinterWorkarea.png" title="current version" />
 </p>
+Partially Coded portions include a redesigned interface, printer calibration section, Slicer, integration with MeshLab, and Resin Printer file export
+  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Calibration%20Models.png" title="Calibration Models" />
+  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Sliced%20Model%20-%20Non%20Manifold.png" title="Slicer - Non-Manifold View" />
+  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/Sliced%20Model%20-%20Layer%20View.png" title="Slicer - Layer View" />
+
 
 
 ### More info:
@@ -79,7 +84,7 @@ Images below display the modified '3D Print Toolbox' (image on the left), the of
 <p align="middle">
   <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon.png" title="current version" width="200" height="600" />
   <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original.png" title="original '3D Print Toolbox'" width="200" height="600" />
-  <img src="https://raw.githubusercontent.com/agapas/3d-print-toolbox-modified/master/images/print3dAddon_original_2021.png" title="current version" width="200" height="600" />
+  <img src="https://github.com/dgm3333/3d-print-toolbox-modified/blob/master/images/print3dAddon_original_2021.png" title="current version" width="200" height="600" />
 
 </p>
 
