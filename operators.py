@@ -531,6 +531,8 @@ class MESH_OT_print3d_clean_thin(Operator):
 
     def execute(self, context):
         # TODO
+        # This needs to search for faces which have no backing (ie are a single face thick)
+        # also for any areas which are too thin for the resolution of the printer
 
         return {'FINISHED'}
 

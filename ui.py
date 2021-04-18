@@ -75,11 +75,22 @@ class VIEW3D_PT_print3d_analyze(View3DPrintPanel, Panel):
         print_3d = context.scene.print_3d
 
         layout.label(text="TODO:")
-        layout.label(text="Presets")
+        layout.label(text="Printer Presets - including creating printer workspace")
+        layout.label(text="Generate Printer Calibration Test Pieces")
+        # Calibration pieces are required to support slicing checks
+        layout.label(text="Include Meshlab Checks")
+        layout.label(text="Include Help")
+        #row = col.row(align="Right")
+        #row.operator("mesh.print3d_trigger_clean", text="", icon="QUESTION",).index = i
+        # NB Icon Viewer is a plugin which adds an button to top of the python console showing the Blender Icons
 
 
         layout.label(text="Statistics")
         row = layout.row(align=True)
+        #row = col.row(align="Right")
+        #row.operator("mesh.print3d_show_hide_beta_items", text="", icon="LIGHT_DATA",).index = i
+
+
         #TODO: add the stats here when button clicked rather than down in the report section
         row.operator("mesh.print3d_info_volume", text="Volume: TODO")
 #        row.prop(print_3d, "area", text="")
@@ -108,13 +119,13 @@ class VIEW3D_PT_print3d_analyze(View3DPrintPanel, Panel):
         row = col.row(align=True)
         layout.label(text="TODO:")
         row = col.row(align=True)
-        layout.label(text="print3d_check_islands+orphans")        
+        layout.label(text="print3d_check_islands+orphans")        # ideally use the meshlab filter "select small disconnected components" to save extra coding
         row = col.row(align=True)
-        layout.label(text="print3d_check_weak_structures")        
+        layout.label(text="print3d_check_thin+weak")        # flag areas too small for robust real-world performance
         row = col.row(align=True)
-        layout.label(text="print3d_check_resin_traps")  
+        layout.label(text="print3d_check_hollows+resin_traps")            # looking for hollow structures internally which may trap uncured resin and would be better cured
         row = col.row(align=True)
-        layout.label(text="print3d_check_touching_boundaries")  
+        layout.label(text="print3d_check_touching_boundaries")  # can't remember why I wanted to do this - probably just delete it
 
         layout.operator("mesh.print3d_check_all", text="Check All")
 
@@ -127,6 +138,7 @@ class VIEW3D_PT_print3d_cleanup(View3DPrintPanel, Panel):
 
     def draw(self, context):
         layout = self.layout
+        layout.label(text="TODO: Merge fully with Results (+/- Checks")
 
         print_3d = context.scene.print_3d
 
@@ -170,6 +182,7 @@ class VIEW3D_PT_print3d_transform(View3DPrintPanel, Panel):
     def draw(self, context):
         layout = self.layout
 
+        layout.label(text="print3d_slice")
         layout.label(text="print3d_add_supports")
 
         layout.label(text="Scale To:-")

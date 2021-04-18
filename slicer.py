@@ -383,155 +383,7 @@ def slicer(step_size = 0.01, normalOfSlice = (0,0,1)):
                
             if cut:
                 facesFromSlice(slices[-1], lowerSlicePoint)
-                '''
-                if len(slices[-1].edges)<=0:
-                    break
-               
-#            vts = slices[-1].verts
-#            edg = slices[-1].edges                            
-#            fac = slices[-1].faces               
-                vts = []               
-                for v in slices[-1].verts:
-                    ed = []
-                    for e in v.link_edges:
-                        ed.append(e.index)
-                        #todo: check there are two verts before trying to access
-                        #ed.append((e.index, e.verts[0].index, e.verts[1].index))
-                    vts.append((v.index, ed, [False]))
-                for v in vts:
-                    print (v)
-                print()
-                edg = []               
-                for e in slices[-1].edges:
-                    vt = []
-                    for v in e.verts:
-                        #todo: check there are two verts before trying to access
-                        vt.append(v.index)
-                    edg.append((e.index, vt, [False]))
-                for e in edg:
-                    print (e)
-                    
-                ID = 0
-                LINKS = 1
-                TRAVERSED = 2
-                sv = 0
-                v = 0
-                e = vts[v][LINKS][0]
-                print(e)
-                travMax = len(vts) + len (edg) - 1
-                trav = 1
-                while trav < travMax:
-                    for l in edg[e][LINKS]:
-                        if vts[ l ][TRAVERSED] == False:
-                            v = l
-                            print(edg[e])
-                            print(edg[e][TRAVERSED][0])
-                            edg[e][TRAVERSED][0] = True
-                            break
-                    if edg[e][TRAVERSED] == False:
-                        print("FAILED")
-                        break
-                    if v == sv:
-                        print("CLOSED LOOP FOUND in ", trav, "/", travMax, "steps")
-                        break
-                    for l in vts[v][LINKS]:
-                        if edg[ l ][TRAVERSED] == False:
-                            e = l
-                            vts[v][TRAVERSED] = True
-                            break
-                    if vts[v][TRAVERSED] == False:
-                        print("FAILED")
-                        break
-                
-
-                   
-            '''    
-
-
-
-
-
-
-
-            '''
-            for j in range(1,len(slices[-1].verts)-1):
-                if vts[j].link_edges[0].verts[0] == vts[0]:
-                    print("success", j)
-            
-            
-            
-            
-            e = slices[-1].edges[0] # edge at the start of the edge loop
-            print(len(e.verts))
-            print(len(e.link_loops))
-            
-
-
-            # get BMLoop that points to the right direction
-            for loop in e.link_loops:
-                if len(loop.vert.link_edges) == 4:
-                    break
-
-                # stop when reach the end of the edge loop
-                while len(loop.vert.link_edges) == 4:
-
-                    # jump between BMLoops to the next BMLoop we need
-                    loop = loop.link_loop_prev.link_loop_radial_prev.link_loop_prev
-
-                    # following edge in the edge loop
-                    e_next = loop.edge
-                        
-                    
-            bmesh.ops.bridge_loops(
-                slices[-1], 
-                edges=slices[-1].edges[:])
-            '''                
-                
-                
-            
-
-
-#            print(slices[-1])
-#            print(ob)
-#            ob.calc_loop_triangles()
-#            for tri in ob.loop_triangles():
-#                print(tri.area)            
-            
-            
-            #createMesh(name, origin, verts, edges, faces)
-            
-            
-            
-#            slices[-1].calc_loop_triangles()
-#            for tri in slices[-1].loop_triangles():
-#                print(tri.area)            
-
-            #coords = [v.co for v in bm.verts]
-            '''
-            #indices = [[loop.vert.index for loop in looptris]
-            slices[-1].calc_loop_triangles()
-            for tri in slices[-1].loop_triangles():
-                print(tri.area)
-
-                     
-            indices = [[loop.vert.index for loop in tri]
-                for tri in slices[-1].calc_loop_triangles()]
-            print(indices)
-            '''            
-            '''
-            # Triangulate it so that we can calculate tri areas
-            bmesh.ops.triangulate( slices[-1], faces = slices[-1].faces )
-            # Ensure faces access
-            slices[-1].faces.ensure_lookup_table()
-
-            # enumerate the faces
-            for face in slices[-1].faces:
-                # Get the face area (can also be 'face.calc_area()')
-                face_area = tri_area( *(v.co for v in face.verts) )
-                print( face.index, face_area )
-            '''
-                
-                
+  
                 
                 
             #print("halving list = ", halving)
@@ -545,11 +397,6 @@ def slicer(step_size = 0.01, normalOfSlice = (0,0,1)):
             #print("len(slices) post drop end: ",len(slices))
             #print("len(halving) post drop end: ",len(slices))
             
-#        if len(halving) > 0:
-#            print("checking for halving[-1] > lBound exit criteria:",halving[-1],lBound)
-#        if len(halving) == 0:
-#            print("EXITING: len(halving) == 0")
-#            break
        
     print("FINISHED")
     print("Sliced object into ", steps, "slices each ", step_size, "unit thick")
@@ -559,4 +406,4 @@ def slicer(step_size = 0.01, normalOfSlice = (0,0,1)):
 
 
 #slicer(step_size = 0.01, normalOfSlice = (0,0,1))
-slicer(1, (0,0,1))
+#slicer(0.01, (0,0,1))
